@@ -1,6 +1,7 @@
 package com.tiles.server;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,5 +23,15 @@ public class MyController {
         // Return a response, e.g., an OK status
         // return new ResponseEntity<>("Data received successfully", HttpStatus.OK);
         return new ResponseEntity<>(requestData, HttpStatus.OK);
+    }
+
+    @GetMapping("/info")
+    public String info() {
+        
+        System.out.println("placeholder");
+
+        return "{\"placeholder\":\"placholder\"}";
+        
+
     }
 }
