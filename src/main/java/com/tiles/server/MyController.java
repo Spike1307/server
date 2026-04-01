@@ -56,6 +56,17 @@ public class MyController {
         return new ResponseEntity<>(requestData, HttpStatus.OK);
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<String> handleJsonRequest(@RequestBody LoginData loginData) {
+        System.out.println("name: " + loginData.getName());
+        return new ResponseEntity<>(loginData.generateToken(), HttpStatus.OK);
+
+        //need to handle response cases better -- needs authentication 
+        //      - Make a map and check if login details match? seperate class?
+        //store token
+        //might need to just send back the token and not the entire LoginData Object
+    }
+
     @GetMapping("/info")
     public Map<String, Object> info(
     		@RequestParam(defaultValue = "5") int y,
