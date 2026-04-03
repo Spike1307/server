@@ -1,7 +1,10 @@
 package com.tiles.server;
 
 import java.security.SecureRandom;
+import java.util.AbstractMap;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginData {
     private String name;
@@ -23,10 +26,11 @@ public class LoginData {
     private static final SecureRandom Token = new SecureRandom();
     private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder();
     
-    public String generateToken() {
+    public Map.Entry<String, String> generateToken() {
         byte[] randomBytes = new byte[24];
         Token.nextBytes(randomBytes);
         String token = base64Encoder.encodeToString(randomBytes);
-        return  "{\"session\": " + "\"" + token + "\"}";
+        //session.put(token, "{\"session\": " + "\"" + token + "\"}");
+        return new AbstractMap.SimpleEntry<>(token, "{\"session\": " + "\"" + token + "\"}");
     }
 }
