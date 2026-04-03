@@ -5,8 +5,8 @@
 # - index.html, script.js, style.css
 # - assets/64x64/ (all PNG images)
 
-echo "Building Maven project..."
-mvn clean package -DskipTests
+# echo "Building Maven project..."
+# mvn clean package -DskipTests
 
 echo "Building Docker image..."
 docker build -t tileserver:latest .

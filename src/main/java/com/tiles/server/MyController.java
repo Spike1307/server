@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -46,7 +48,15 @@ public class MyController {
 		{"g", "g", "g", "g", "g", "W", "W", "W", "g", "g", "W", "W", "g", "g", "g", "g", "t", "g", "g", "g"},
 		{"g", "g", "g", "g", "g", "g", "g", "g", "g", "g", "W", "g", "g", "g", "g", "g", "g", "g", "g", "g"}
 	};
+    
+    //loading credentials
+    //can't find the file for some reason
+    //look into loading files from maven resource folder
+    
+    AccountDetails accountDetails = new AccountDetails("AccountDetails.txt");
+    HashMap<String, String> logins = accountDetails.getMap();
 
+    
     @PostMapping("/test")
     public ResponseEntity<RequestData> handleJsonRequest(@RequestBody RequestData requestData) {
         System.out.println("Received name: " + requestData.getName());
@@ -56,15 +66,28 @@ public class MyController {
         return new ResponseEntity<>(requestData, HttpStatus.OK);
     }
 
+
     @PostMapping("/login")
-    public ResponseEntity<String> handleJsonRequest(@RequestBody LoginData loginData) {
+    public ResponseEntity<String> handleJsonRequest(@RequestBody LoginData loginData) { //maybe need @RequestParam because inputs as form? -- don't think so the script converts to JSON
+        //PROBLEM: Password is null for some reason with @RequestBody
+
+
         System.out.println("name: " + loginData.getName());
-        return new ResponseEntity<>(loginData.generateToken(), HttpStatus.OK);
+        System.out.println("encpswrd: " + loginData.getPass());
+
+        if(loginData.getPass().equals(logins.get(loginData.getName()))) {
+            return new ResponseEntity<>(loginData.generateToken(), HttpStatus.OK);
+        } else if (!loginData.getPass().equals(logins.get(loginData.getName()))) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        
 
         //need to handle response cases better -- needs authentication 
         //      - Make a map and check if login details match? seperate class?
         //store token
-        //might need to just send back the token and not the entire LoginData Object
+        // needs to check login then store and send back token.
     }
 
     @GetMapping("/info")
