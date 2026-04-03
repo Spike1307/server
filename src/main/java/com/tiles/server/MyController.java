@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -46,7 +48,15 @@ public class MyController {
 		{"g", "g", "g", "g", "g", "W", "W", "W", "g", "g", "W", "W", "g", "g", "g", "g", "t", "g", "g", "g"},
 		{"g", "g", "g", "g", "g", "g", "g", "g", "g", "g", "W", "g", "g", "g", "g", "g", "g", "g", "g", "g"}
 	};
+    
+    //loading credentials from file not working -- look into loading resources with Spring
+    
+    AccountDetails accountDetails = new AccountDetails("AccountDetails.txt");
+    //Create HashMap of account credentials
+    HashMap<String, String> logins = accountDetails.getMap();
 
+    Sessions sessions = new Sessions();
+    
     @PostMapping("/test")
     public ResponseEntity<RequestData> handleJsonRequest(@RequestBody RequestData requestData) {
         System.out.println("Received name: " + requestData.getName());
@@ -54,6 +64,49 @@ public class MyController {
         System.out.println("Received silver: " + requestData.getSilver());
         System.out.println("Received bronze: " + requestData.getBronze());
         return new ResponseEntity<>(requestData, HttpStatus.OK);
+    }
+
+
+    @PostMapping("/login")
+    public ResponseEntity<String> handleJsonRequest(@RequestBody LoginData loginData) { 
+
+        //Checking if sent password matches password stored against sent name
+        if(loginData.getEncpswrd().equals(logins.get(loginData.getName()))) {
+            System.out.println(loginData.getName() + " logged in");
+
+            //Generate single pair -- key = raw token, value = JSON formatted token
+            Map.Entry<String, String> token = loginData.generateToken();
+
+            //Add token as key to map tracking current sessions
+            sessions.addSession(token.getKey(), loginData.getName());
+
+            //Return response with JSON formatted token
+            return new ResponseEntity<>(token.getValue(), HttpStatus.OK);
+
+        } else if (!loginData.getEncpswrd().equals(logins.get(loginData.getName()))) {
+            System.out.println("Invalid Credentials");
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        //TODO
+        //Get AccountDetails file read working
+        //      maybe try? https://www.geeksforgeeks.org/advance-java/read-file-from-resources-folder-in-spring-boot/
+        
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<String> handleLogOut(@RequestParam String session) {
+        
+        //sessions.list();
+
+        //If session key is currently in use and valid, remove it
+        if (sessions.logOut(session) != null) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     @GetMapping("/info")
