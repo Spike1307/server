@@ -68,26 +68,23 @@ public class MyController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<String> handleJsonRequest(@RequestBody LoginData loginData) { //maybe need @RequestParam because inputs as form? -- don't think so the script converts to JSON
-        //PROBLEM: Password is null for some reason with @RequestBody
+    public ResponseEntity<String> handleJsonRequest(@RequestBody LoginData loginData) { 
 
+        //System.out.println("name: " + loginData.getName());
 
-        System.out.println("name: " + loginData.getName());
-        System.out.println("encpswrd: " + loginData.getPass());
-
-        if(loginData.getPass().equals(logins.get(loginData.getName()))) {
+        if(loginData.getEncpswrd().equals(logins.get(loginData.getName()))) {
+            System.out.println(loginData.getName() + " logged in");
             return new ResponseEntity<>(loginData.generateToken(), HttpStatus.OK);
-        } else if (!loginData.getPass().equals(logins.get(loginData.getName()))) {
+        } else if (!loginData.getEncpswrd().equals(logins.get(loginData.getName()))) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        
 
-        //need to handle response cases better -- needs authentication 
-        //      - Make a map and check if login details match? seperate class?
-        //store token
-        // needs to check login then store and send back token.
+        //TODO
+        //Token Storage
+        //Get AccountDetails file working
+        
     }
 
     @GetMapping("/info")

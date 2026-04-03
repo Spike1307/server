@@ -17,8 +17,8 @@ public class LoginData {
     // Getters and setters (required by most JSON mapping libraries like Jackson)
     public String getName() { return this.name; }
     public void setName(String name) { this.name = name; }
-    public String getPass() { return this.encpswrd; }
-    public void setPass(String encpswrd) { this.encpswrd = encpswrd; }
+    public String getEncpswrd() { return this.encpswrd; }
+    public void setEncpswrd(String encpswrd) { this.encpswrd = encpswrd; }
 
     private static final SecureRandom Token = new SecureRandom();
     private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder();
