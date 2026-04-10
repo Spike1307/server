@@ -135,8 +135,8 @@ public class MyController {
         // Calculate window bounds
         int top = y - viewMiddleY;
         int left = x - viewMiddleX;
-        int bottom = top + viewHeight;
-        int right = left + viewWidth;
+        int bottom = top + viewHeight - 1; //corrected off by 1 error (DS)
+        int right = left + viewWidth - 1; //corrected off by 1 error (DS)
         
         // Extract map window
         String[][] mapWindow = new String[viewHeight][viewWidth];

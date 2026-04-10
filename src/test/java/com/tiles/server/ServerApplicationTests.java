@@ -87,8 +87,8 @@ class ServerApplicationTests {
         .andExpect(jsonPath("$.y").value(5))
 		.andExpect(jsonPath("$.top").value(0))
 		.andExpect(jsonPath("$.left").value(0))
-		//.andExpect(jsonPath("$.bottom").value(10))
-		//.andExpect(jsonPath("$.right").value(10))
+		.andExpect(jsonPath("$.bottom").value(10))
+		.andExpect(jsonPath("$.right").value(10))
 		.andReturn();
 		
 		String[][] receivedMapWindow = returnReceivedMapWindow(result);
@@ -116,8 +116,8 @@ class ServerApplicationTests {
         .andExpect(jsonPath("$.y").value(7))
 		.andExpect(jsonPath("$.top").value(2))
 		.andExpect(jsonPath("$.left").value(0))
-		//.andExpect(jsonPath("$.bottom").value(10))
-		//.andExpect(jsonPath("$.right").value(10))
+		.andExpect(jsonPath("$.bottom").value(12))
+		.andExpect(jsonPath("$.right").value(10))
 		.andReturn();
 		
 		String[][] receivedMapWindow = returnReceivedMapWindow(result);
