@@ -55,6 +55,12 @@ public class MyController {
 
     
     Sessions sessions = new Sessions();
+
+    //Position Setter (required for tests)
+    public void setPosition(int newX, int newY) { 
+        this.playerX = newX; 
+        this.playerY = newY;
+    }
     
     @PostMapping("/test")
     public ResponseEntity<RequestData> handleJsonRequest(@RequestBody RequestData requestData) {
