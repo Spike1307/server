@@ -16,6 +16,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,6 +34,7 @@ public class MyController {
 	private static final int MAP_HEIGHT = 20;
 	
 	// Hardcoded map data (same as frontend)
+    /* 
 	private static final String[][] MAP = {
 		{"g", "g", "g", "g", "g", "g", "g", "g", "g", ".", "W", "g", "t", "t", "g", "g", "t", "g", "g", "g"},
 		{"S", "S", "S", "S", "S", "S", "g", "g", "g", "g", "W", "g", "t", ";", "t", "t", "t", "g", "g", "g"},
@@ -55,6 +57,10 @@ public class MyController {
 		{"g", "g", "g", "g", "g", "W", "W", "W", "g", "g", "W", "W", "g", "g", "g", "g", "t", "g", "g", "g"},
 		{"g", "g", "g", "g", "g", "g", "g", "g", "g", "g", "W", "g", "g", "g", "g", "g", "g", "g", "g", "g"}
 	};
+    */
+    
+    //Map to be loaded from text file
+    private String[][] MAP = new String[MAP_HEIGHT][MAP_WIDTH];
 
     // Record to store the terrain details (second + third columns from terrain text file)
     private record tileInfo(String description, boolean blocking) {}
@@ -71,7 +77,35 @@ public class MyController {
 
     public MyController() {
 
+        //Load Map
         try{
+
+              MAP = Files.lines(getFilePath("Map.txt"))
+                    .map(String::trim)
+                    .filter(line -> !line.isEmpty()) // skip empty lines
+                    .map(line -> line.split(", "))  
+                    .filter(parts -> parts.length == MAP_WIDTH) //Skip lines missing entries.
+                    .map(parts -> Arrays.stream(parts)
+                                        .map(element -> element.substring(1,2))
+                                        .toArray(String[]::new))
+                    .toArray(String[][]::new);
+
+        } catch (IOException e) {
+
+            System.out.println("Unable to load map file!");
+            //e.printStackTrace();
+            System.exit(1);
+
+        }
+
+        System.out.println("Map File:");
+        Arrays.stream(MAP)
+      		.map(Arrays::toString)
+      		.forEach(System.out::println);
+
+        //Load terrain key
+        try{
+
             terrains = Files.lines(getFilePath("Terrains.txt"))
                     .map(String::trim)
                     .filter(line -> !line.isEmpty()) // skip empty lines
@@ -84,10 +118,13 @@ public class MyController {
                                     parts[2].equalsIgnoreCase("blocking") //true if "blocking", otherwise false
                             )
                     ));
+
         } catch (IOException e) {
+
             System.out.println("Unable to load terrain legend file!");
             //e.printStackTrace();
-            System.exit(1);
+            System.exit(2);
+            
         }
 
         System.out.println("Terrain key:");
