@@ -7,11 +7,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -68,7 +72,7 @@ public class MyController {
     public MyController() {
 
         try{
-            terrains = Files.lines(Paths.get("classpath:Terrains.txt"))
+            terrains = Files.lines(getFilePath("Terrains.txt"))
                     .map(String::trim)
                     .filter(line -> !line.isEmpty()) // skip empty lines
                     .map(line -> line.split("\\s*,\\s*"))  //split("\\s*,\\s*") handles commas with optional spaces.
@@ -81,7 +85,9 @@ public class MyController {
                             )
                     ));
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Unable to load terrain legend file!");
+            //e.printStackTrace();
+            System.exit(1);
         }
 
         System.out.println("Terrain key:");
@@ -94,6 +100,16 @@ public class MyController {
     public void setPosition(int newX, int newY) { 
         this.playerX = newX; 
         this.playerY = newY;
+    }
+
+    //Helper method to return path object from asset name, for streaming files
+    private Path getFilePath(String asset) throws IOException {
+
+        Resource resource = new ClassPathResource(asset);
+        File file = resource.getFile();
+        String absolutePath = file.getAbsolutePath();
+        return Paths.get(absolutePath);
+
     }
     
     @PostMapping("/test")
