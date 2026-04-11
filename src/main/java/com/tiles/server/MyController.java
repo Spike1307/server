@@ -196,7 +196,7 @@ public class MyController {
     }
     
     @GetMapping("/move")
-    public String move(
+    public ResponseEntity<MoveResponse>  move(
     		@RequestParam(defaultValue = "0") int dy,
     		@RequestParam(defaultValue = "0") int dx) {
         
@@ -222,6 +222,8 @@ public class MyController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         
+        //Not sure if this wrapping/clamping logic is needed, but left just in case - DS
+        /* 
         // Wrap x coordinate
         if (newX < 0) {
             newX += MAP_WIDTH;
@@ -235,12 +237,18 @@ public class MyController {
         } else if (newY >= MAP_HEIGHT) {
             newY = MAP_HEIGHT - 1;
         }
+        */
+
+        //Move request is valid, update stored player location on server
+        playerX = proposedNewX;
+        playerY = proposedNewY;
         
-        playerX = newX;
-        playerY = newY;
+        System.out.println("New player position: x=" + playerX + ", y=" + playerY);
         
-        System.out.println("Player position: x=" + playerX + ", y=" + playerY);
-        
-        return "ok";
+        // Build response
+        MoveResponse response = new MoveResponse(playerX, playerY);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
     }
 }
