@@ -8,8 +8,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -46,6 +51,11 @@ public class MyController {
 		{"g", "g", "g", "g", "g", "W", "W", "W", "g", "g", "W", "W", "g", "g", "g", "g", "t", "g", "g", "g"},
 		{"g", "g", "g", "g", "g", "g", "g", "g", "g", "g", "W", "g", "g", "g", "g", "g", "g", "g", "g", "g"}
 	};
+
+    // Record to store the terrain details (second + third columns from terrain text file)
+    private record tileInfo(String description, boolean blocking) {}
+
+    private Map<Character, tileInfo> terrains;
     
     //loading credentials from file not working -- look into loading resources with Spring
     
@@ -53,8 +63,32 @@ public class MyController {
     //Create HashMap of account credentials
     HashMap<String, String> logins = accountDetails.getMap();
 
-    
     Sessions sessions = new Sessions();
+
+    public MyController() {
+
+        try{
+            terrains = Files.lines(Paths.get("classpath:Terrains.txt"))
+                    .map(String::trim)
+                    .filter(line -> !line.isEmpty()) // skip empty lines
+                    .map(line -> line.split("\\s*,\\s*"))  //split("\\s*,\\s*") handles commas with optional spaces.
+                    .filter(parts -> parts.length == 3) //Skip lines missing entries.
+                    .collect(Collectors.toMap(
+                            parts -> parts[0].charAt(0), // key
+                            parts -> new tileInfo(
+                                    parts[1], //Tile description
+                                    parts[2].equalsIgnoreCase("blocking") //true if "blocking", otherwise false
+                            )
+                    ));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Terrain key:");
+        terrains.forEach((k, v) ->
+                    System.out.println(k + " , " + v.description + " , " + v.blocking));
+
+    }
 
     //Position Setter (required for tests)
     public void setPosition(int newX, int newY) { 
@@ -181,6 +215,12 @@ public class MyController {
         if (!((proposedNewX >= 0 && proposedNewX < MAP_WIDTH) && (proposedNewY >= 0 && proposedNewY < MAP_HEIGHT))) { 
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }  
+
+        //Check for moving into blocking terrain
+        if(terrains.get(MAP[proposedNewY][proposedNewX]).blocking == true) {
+            System.out.println("Movement blocked by: " + terrains.get(MAP[proposedNewY][proposedNewX]).description);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
         
         // Wrap x coordinate
         if (newX < 0) {
