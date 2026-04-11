@@ -75,7 +75,7 @@ public class MyController {
             terrains = Files.lines(getFilePath("Terrains.txt"))
                     .map(String::trim)
                     .filter(line -> !line.isEmpty()) // skip empty lines
-                    .map(line -> line.split("\\s*,\\s*"))  //split("\\s*,\\s*") handles commas with optional spaces.
+                    .map(line -> line.split("\\s*\\|\\s*"))  //split regex handles '|' delimeter with optional padding on either side.
                     .filter(parts -> parts.length == 3) //Skip lines missing entries.
                     .collect(Collectors.toMap(
                             parts -> parts[0].substring(0,1), //single character key (as string)
@@ -92,7 +92,7 @@ public class MyController {
 
         System.out.println("Terrain key:");
         terrains.forEach((k, v) ->
-                    System.out.println(k + " , " + v.description + " , " + v.blocking));
+                    System.out.println(k + " | " + v.description + " | " + v.blocking));
 
     }
 
