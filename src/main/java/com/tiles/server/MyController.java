@@ -32,32 +32,6 @@ public class MyController {
 	// Map dimensions
 	private static final int MAP_WIDTH = 20;
 	private static final int MAP_HEIGHT = 20;
-	
-	// Hardcoded map data (same as frontend)
-    /* 
-	private static final String[][] MAP = {
-		{"g", "g", "g", "g", "g", "g", "g", "g", "g", ".", "W", "g", "t", "t", "g", "g", "t", "g", "g", "g"},
-		{"S", "S", "S", "S", "S", "S", "g", "g", "g", "g", "W", "g", "t", ";", "t", "t", "t", "g", "g", "g"},
-		{"S", "w", "w", "w", "w", "S", "g", "g", "g", "W", "W", "g", "t", "t", "t", "t", "t", "t", "g", "g"},
-		{"S", "w", "w", "w", "w", "S", "g", "g", "W", "W", "g", "g", "t", "t", "t", "t", "t", "g", "g", "g"},
-		{"S", "S", "S", "D", "S", "S", "g", "g", "W", "g", "g", "t", "t", "t", "g", "g", "g", "g", "g", "g"},
-		{"g", "g", ",", "_", "g", "g", "g", "W", "W", "W", "g", "t", "g", "g", "g", "g", "g", "g", "g", "g"},
-		{".", "g", "g", "_", "g", "g", "g", "W", "g", "W", ".", "g", "g", "g", "g", "g", "g", "g", "g", "g"},
-		{"_", "_", "_", "_", "g", "g", "W", "W", "g", "W", "W", "g", "g", "g", "g", "_", "_", "_", "_", "_"},
-		{"_", "g", "t", "t", "g", "W", "W", "W", "g", "g", "W", "g", "g", "g", "g", "_", "g", "g", "g", "g"},
-		{"_", "g", "g", "t", "g", "W", "W", "g", "g", "g", "W", "g", "g", "g", "B", "D", "B", "g", "g", "g"},
-		{"_", "g", "g", "g", "g", "g", "g", "g", "g", "g", "W", "W", "g", "g", "B", "f", "B", ".", "g", "g"},
-		{"_", "g", "g", "g", "g", "g", "t", "t", "g", "W", "W", "g", "g", "B", "B", "f", "B", "B", "g", "g"},
-		{"_", "g", "g", "g", "g", "g", "t", "g", "g", "W", ",", "g", "g", "B", "f", "f", "f", "B", "g", "g"},
-		{"_", "g", "g", "g", "g", "g", "g", "g", "g", "W", "W", "g", "g", "B", "f", "f", "f", "B", "g", "g"},
-		{"_", "_", "g", "g", "g", "g", "g", "g", "W", ".", "W", "g", "g", "B", "f", "f", "f", "B", "g", "g"},
-		{"g", "_", "_", "g", "g", "g", "g", "W", "W", "g", "W", "g", "g", "B", "B", "B", "B", "B", "g", "g"},
-		{"g", "g", "_", "g", "g", "g", "g", "W", "g", "g", "W", "g", "g", "g", "g", "g", "g", "g", "g", "g"},
-		{"g", "g", "_", "g", "g", "g", "W", "W", "g", "g", "W", "W", "g", "g", ":", "g", "g", "g", "g", "g"},
-		{"g", "g", "g", "g", "g", "W", "W", "W", "g", "g", "W", "W", "g", "g", "g", "g", "t", "g", "g", "g"},
-		{"g", "g", "g", "g", "g", "g", "g", "g", "g", "g", "W", "g", "g", "g", "g", "g", "g", "g", "g", "g"}
-	};
-    */
     
     //Map to be loaded from text file
     private String[][] MAP = new String[MAP_HEIGHT][MAP_WIDTH];
@@ -137,6 +111,11 @@ public class MyController {
     public void setPosition(int newX, int newY) { 
         this.playerX = newX; 
         this.playerY = newY;
+    }
+
+    //Map Getter (required for tests)
+    public String[][] getMap() {
+        return this.MAP;
     }
 
     //Helper method to return path object from asset name, for streaming files
