@@ -55,6 +55,12 @@ public class MyController {
 
     
     Sessions sessions = new Sessions();
+
+    //Position Setter (required for tests)
+    public void setPosition(int newX, int newY) { 
+        this.playerX = newX; 
+        this.playerY = newY;
+    }
     
     @PostMapping("/test")
     public ResponseEntity<RequestData> handleJsonRequest(@RequestBody RequestData requestData) {
@@ -109,11 +115,16 @@ public class MyController {
     }
 
     @GetMapping("/info")
-    public Map<String, Object> info(
+    public ResponseEntity<InfoResponse> info(
     		@RequestParam(defaultValue = "5") int y,
     		@RequestParam(defaultValue = "5") int x) {
         
         System.out.println("Info request: x=" + x + ", y=" + y);
+        
+        //Return status 204 and exit early, if received coordinates do not match current player location stored on server
+        if (x!=playerX||y!=playerY) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
         
         // Define view window (11x11 centered on player)
         int viewWidth = 11;
@@ -124,8 +135,8 @@ public class MyController {
         // Calculate window bounds
         int top = y - viewMiddleY;
         int left = x - viewMiddleX;
-        int bottom = top + viewHeight;
-        int right = left + viewWidth;
+        int bottom = top + viewHeight - 1; //corrected off by 1 error (DS)
+        int right = left + viewWidth - 1; //corrected off by 1 error (DS)
         
         // Extract map window
         String[][] mapWindow = new String[viewHeight][viewWidth];
@@ -144,16 +155,10 @@ public class MyController {
         }
         
         // Build response
-        Map<String, Object> response = new HashMap<>();
-        response.put("x", playerX);
-        response.put("y", playerY);
-        response.put("top", top);
-        response.put("left", left);
-        response.put("bottom", bottom);
-        response.put("right", right);
-        response.put("info", mapWindow);
+        InfoResponse response = new InfoResponse(playerX, playerY, top, left, bottom, right, mapWindow);
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
         
-        return response;
     }
     
     @GetMapping("/move")
