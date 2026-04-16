@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -43,13 +44,17 @@ public class MyController {
     
     //loading credentials from file not working -- look into loading resources with Spring
     
-    AccountDetails accountDetails = new AccountDetails("AccountDetails.txt");
-    //Create HashMap of account credentials
-    HashMap<String, String> logins = accountDetails.getMap();
+    // AccountDetails accountDetails = new AccountDetails("AccountDetails.txt");
+    // //Create HashMap of account credentials
+    // HashMap<String, String> logins = accountDetails.getMap();
 
-    Sessions sessions = new Sessions();
+    @Autowired
+    private final AccountDetails accountDetails;
+    private final Sessions sessions = new Sessions();
 
-    public MyController() {
+
+    public MyController(AccountDetails accountDetails) {
+        this.accountDetails = accountDetails;
 
         //Load Map
         try{
@@ -142,7 +147,7 @@ public class MyController {
     public ResponseEntity<String> handleJsonRequest(@RequestBody LoginData loginData) { 
 
         //Checking if sent password matches password stored against sent name
-        if(loginData.getEncpswrd().equals(logins.get(loginData.getName()))) {
+        if(loginData.getEncpswrd().equals(accountDetails.getMap().get(loginData.getName()))) {
             System.out.println(loginData.getName() + " logged in");
 
             //generate token
@@ -154,7 +159,7 @@ public class MyController {
             //Return response with JSON formatted token
             return new ResponseEntity<>("{\"session\": " + "\"" + token + "\"}", HttpStatus.OK);
 
-        } else if (!loginData.getEncpswrd().equals(logins.get(loginData.getName()))) {
+        } else if (!loginData.getEncpswrd().equals(accountDetails.getMap().get(loginData.getName()))) {
             System.out.println("Invalid Credentials");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } else {
