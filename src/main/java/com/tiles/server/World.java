@@ -138,6 +138,18 @@ public class World {
         return MAP_HEIGHT;
     }
 
+    public boolean isBlocking(int Y, int X) {
+
+         return this.terrains.get(this.MAP[Y][X]).blocking;
+
+    }
+
+    public String getTileDescription(int Y, int X) {
+
+        return this.terrains.get(this.MAP[Y][X]).description;
+    
+    }
+
 }
 
 //Austins approach:
