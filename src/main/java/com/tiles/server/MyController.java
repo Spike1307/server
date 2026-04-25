@@ -51,6 +51,11 @@ public class MyController {
     public String[][] getMap() {
         return this.world.getMap();
     }
+
+    //Session verification (required for tests)
+    public String verifySession(String token) {
+        return this.sessions.getUserName(token);
+    }
     
     @PostMapping("/test")
     public ResponseEntity<RequestData> handleJsonRequest(@RequestBody RequestData requestData) {

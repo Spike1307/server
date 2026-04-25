@@ -5,17 +5,17 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import org.springframework.boot.test.context.SpringBootTest;
 //import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 
 import java.util.Arrays;
 
@@ -81,21 +81,35 @@ class ServerApplicationTests {
 		{"_", "g", "g", "g", "g", "g", "t", "g", "g", "W", "," },
 	};
 
+	private static final LoginData valid = new LoginData("john", "c9765b38a8ded4d7f4286cbab7c104e95208a911b189beaf3c88182376e6bf32");
+
 	@Autowired
     private MockMvc mockMvc;
 
 	@Autowired
 	private MyController controller;
 
-	private String[][] returnReceivedMapWindow (MvcResult response) throws Exception {
+	private String[][] returnReceivedMapWindow (MvcResult result) throws Exception {
 
-		String jsonString = response.getResponse().getContentAsString();
+		String jsonString = result.getResponse().getContentAsString();
 	
 		JsonNode root = objectMapper.readTree(jsonString);
     	JsonNode infoNode = root.get("info");
 
 		String[][] newGrid = objectMapper.treeToValue(infoNode, String[][].class);
 		return newGrid;
+
+	}
+
+	private String returnReceivedToken (MvcResult result) throws Exception {
+
+		String jsonString = result.getResponse().getContentAsString();
+	
+		JsonNode root = objectMapper.readTree(jsonString);
+    	JsonNode sessionNode = root.get("session");
+
+		String newToken = objectMapper.treeToValue(sessionNode, String.class);
+		return newToken;
 
 	}
 
@@ -178,6 +192,24 @@ class ServerApplicationTests {
             .param("x", "6")
             .param("y", "7"))
         .andExpect(status().isNoContent());
+
+	}
+
+	@Test
+	@Order(5)
+	void validLogin() throws Exception {
+
+		MvcResult result = mockMvc.perform(post("/login")
+			.contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(valid)))
+        	.andExpect(status().isOk())
+			.andReturn();
+
+		System.out.println(result.getResponse().getContentAsString());
+		
+		String token = returnReceivedToken(result);
+		
+		assertEquals(controller.verifySession(token),valid.getName());
 
 	}
 
