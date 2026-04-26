@@ -3,6 +3,7 @@ package com.tiles.server;
 //import java.io.BufferedReader;
 //import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.File;
 import java.util.Arrays;
 //import java.util.HashMap;
@@ -11,6 +12,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+
+import java.nio.charset.StandardCharsets;
 //import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,25 +45,25 @@ public class World {
 
         try{
             
-            Path mapPath = getFilePath("Map.txt");
+            //Path mapPath = getFilePath("Map.txt");
+            
+            ClassPathResource resource = new ClassPathResource("Map.txt"); 
 
-            try{
+            InputStream is = resource.getInputStream();
 
-                MAP = Files.lines(mapPath)
-                    .map(String::trim)
-                    .filter(line -> !line.isEmpty()) // skip empty lines
-                    .map(line -> line.split(", "))  
-                    .filter(parts -> parts.length == MAP_WIDTH) //Skip lines missing entries.
-                    .map(parts -> Arrays.stream(parts)
-                                        .map(element -> element.substring(1,2))
-                                        .toArray(String[]::new))
-                    .toArray(String[][]::new);
+            String map = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
-            } catch (IOException e) {
+            //MAP = Files.lines(mapPath)
+            MAP = map.lines()
+                .map(String::trim)
+                .filter(line -> !line.isEmpty()) // skip empty lines
+                .map(line -> line.split(", "))  
+                .filter(parts -> parts.length == MAP_WIDTH) //Skip lines missing entries.
+                .map(parts -> Arrays.stream(parts)
+                                    .map(element -> element.substring(1,2))
+                                    .toArray(String[]::new))
+                .toArray(String[][]::new);
 
-                throw new RuntimeException("Unable to open map file!", e);
-
-            }
 
         } catch (IOException e) {
 
@@ -79,27 +82,26 @@ public class World {
 
         try {
 
-            Path terrainsPath = getFilePath("Terrains.txt");
+            //Path terrainsPath = getFilePath("Terrains.txt");
+            ClassPathResource resource = new ClassPathResource("Terrains.txt"); 
 
-            try{
+            InputStream is = resource.getInputStream();
 
-                terrains = Files.lines(terrainsPath)
-                    .map(String::trim)
-                    .filter(line -> !line.isEmpty()) // skip empty lines
-                    .map(line -> line.split("\\s*\\|\\s*"))  //split regex handles '|' delimeter with optional padding on either side.
-                    .filter(parts -> parts.length == 3) //Skip lines missing entries.
-                    .collect(Collectors.toMap(
-                            parts -> parts[0].substring(0,1), //single character key (as string)
-                            parts -> new tileInfo(
-                                    parts[1], //Tile description
-                                    parts[2].equalsIgnoreCase("blocking") //true if "blocking", otherwise false
-                            )));
+            String terrainString = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
-            } catch (IOException e) {
-
-                throw new RuntimeException("Unable to open terrain file!", e);
-            
-            }
+            //terrains = Files.lines(terrainsPath)
+            terrains = terrainString.lines()
+                .map(String::trim)
+                .filter(line -> !line.isEmpty()) // skip empty lines
+                .map(line -> line.split("\\s*\\|\\s*"))  //split regex handles '|' delimeter with optional padding on either side.
+                .filter(parts -> parts.length == 3) //Skip lines missing entries.
+                .collect(Collectors.toMap(
+                        parts -> parts[0].substring(0,1), //single character key (as string)
+                        parts -> new tileInfo(
+                                parts[1], //Tile description
+                                parts[2].equalsIgnoreCase("blocking") //true if "blocking", otherwise false
+                        )));
+        
 
         } catch (IOException e) {
 
