@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.micrometer.common.util.StringUtils;
+
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -70,6 +73,18 @@ public class MyController {
     @PostMapping("/login")
     public ResponseEntity<String> handleJsonRequest(@RequestBody LoginData loginData) { 
 
+        //Check for bad request
+        
+        if (StringUtils.isBlank(loginData.getName())) {
+            System.out.println("Bad name field - Bad Request");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        
+        if  (StringUtils.isBlank(loginData.getEncpswrd())) {
+            System.out.println("Bad password field - Bad Request");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        
         //Checking if sent password matches password stored against sent name
         if(loginData.getEncpswrd().equals(accountDetails.getMap().get(loginData.getName()))) {
             System.out.println(loginData.getName() + " logged in");
@@ -83,12 +98,10 @@ public class MyController {
             //Return response with JSON formatted token
             return new ResponseEntity<>("{\"session\": " + "\"" + token + "\"}", HttpStatus.OK);
 
-        } else if (!loginData.getEncpswrd().equals(accountDetails.getMap().get(loginData.getName()))) {
+        } else {
             System.out.println("Invalid Credentials");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        } 
 
         //TODO
         //Get AccountDetails file read working
