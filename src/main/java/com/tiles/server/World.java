@@ -121,6 +121,8 @@ public class World {
 
     }
 
+    //Deprecated, method didnt work in prod container - DS
+    /* 
     private Path getFilePath(String asset) throws IOException {
 
         ClassPathResource resource = new ClassPathResource(asset);
@@ -129,7 +131,8 @@ public class World {
         return Paths.get(absolutePath);
 
     }
-
+    */
+    
     public String[][] getMap() {
         return this.MAP;
     }
