@@ -1,12 +1,10 @@
 package com.tiles.server;
 
-//import java.io.BufferedReader;
-//import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.File;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+
 import java.util.Arrays;
-//import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -14,10 +12,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-//import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Component
 public class World {
@@ -42,19 +36,20 @@ public class World {
     }
 
     private void loadMap() {
-
-        try{
             
-            //Path mapPath = getFilePath("Map.txt");
-            
-            ClassPathResource resource = new ClassPathResource("Map.txt"); 
+        //Old approach:
+        //Path mapPath = getFilePath("Map.txt");
 
-            InputStream is = resource.getInputStream();
+        //Austin's approach:
+        //InputStream is = resource.getInputStream();
+        //String map = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
-            String map = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        ClassPathResource resource = new ClassPathResource("Map.txt"); 
+    
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
 
             //MAP = Files.lines(mapPath)
-            MAP = map.lines()
+            MAP = reader.lines()
                 .map(String::trim)
                 .filter(line -> !line.isEmpty()) // skip empty lines
                 .map(line -> line.split(", "))  
@@ -67,7 +62,7 @@ public class World {
 
         } catch (IOException e) {
 
-            throw new RuntimeException("Unable to get file reference for map file!", e);
+            throw new RuntimeException("Unable to load map file!", e);  
 
         }
 
@@ -80,17 +75,20 @@ public class World {
 
     private void loadTerrainLegend() {
 
-        try {
+        //Old approach:
+        //Path terrainsPath = getFilePath("Terrains.txt");
+        //terrains = Files.lines(terrainsPath)
+            
+        //Austin's approach:
+        //ClassPathResource resource = new ClassPathResource("Terrains.txt"); 
+        //InputStream is = resource.getInputStream();
+        //String terrainString = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
-            //Path terrainsPath = getFilePath("Terrains.txt");
-            ClassPathResource resource = new ClassPathResource("Terrains.txt"); 
+        ClassPathResource resource = new ClassPathResource("Terrains.txt"); 
 
-            InputStream is = resource.getInputStream();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
 
-            String terrainString = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-
-            //terrains = Files.lines(terrainsPath)
-            terrains = terrainString.lines()
+            terrains = reader.lines()
                 .map(String::trim)
                 .filter(line -> !line.isEmpty()) // skip empty lines
                 .map(line -> line.split("\\s*\\|\\s*"))  //split regex handles '|' delimeter with optional padding on either side.
@@ -105,7 +103,7 @@ public class World {
 
         } catch (IOException e) {
 
-            throw new RuntimeException("Unable to get file reference for terrain file!", e);
+            throw new RuntimeException("Unable to load terrain legend!", e);
 
         }
         
@@ -115,6 +113,8 @@ public class World {
 
     }
 
+    //Deprecated, method didnt work in prod container - DS
+    /* 
     private Path getFilePath(String asset) throws IOException {
 
         ClassPathResource resource = new ClassPathResource(asset);
@@ -123,7 +123,8 @@ public class World {
         return Paths.get(absolutePath);
 
     }
-
+    */
+    
     public String[][] getMap() {
         return this.MAP;
     }
