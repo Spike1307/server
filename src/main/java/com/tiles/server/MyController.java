@@ -124,8 +124,14 @@ public class MyController {
 
     @GetMapping("/info")
     public ResponseEntity<InfoResponse> info(
+    		@RequestParam String session,
     		@RequestParam(defaultValue = "5") int y,
     		@RequestParam(defaultValue = "5") int x) {
+        
+        // Validate session token
+        if (!sessions.isValid(session)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         
         System.out.println("Info request: x=" + x + ", y=" + y);
         
@@ -171,8 +177,14 @@ public class MyController {
     
     @GetMapping("/move")
     public ResponseEntity<MoveResponse>  move(
+    		@RequestParam String session,
     		@RequestParam(defaultValue = "0") int dy,
     		@RequestParam(defaultValue = "0") int dx) {
+        
+        // Validate session token
+        if (!sessions.isValid(session)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         
         System.out.println("Move request: dy=" + dy + ", dx=" + dx);
 

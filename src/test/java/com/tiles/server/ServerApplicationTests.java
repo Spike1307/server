@@ -136,7 +136,17 @@ class ServerApplicationTests {
 	@Order(3)
 	void infoReturnDefaultMapWindow() throws Exception {
     
+		// First login to get a token
+		MvcResult loginResult = mockMvc.perform(post("/login")
+			.contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(valid)))
+        	.andExpect(status().isOk())
+			.andReturn();
+		
+		String token = returnReceivedToken(loginResult);
+		
     	MvcResult result = mockMvc.perform(get("/info")
+            .param("session", token)
             .param("x", "5")
             .param("y", "5"))
         .andExpect(status().isOk())
@@ -163,9 +173,19 @@ class ServerApplicationTests {
 	@Order(4)
 	void infoReturnMovedMapWindow() throws Exception {
 
+		// First login to get a token
+		MvcResult loginResult = mockMvc.perform(post("/login")
+			.contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(valid)))
+        	.andExpect(status().isOk())
+			.andReturn();
+		
+		String token = returnReceivedToken(loginResult);
+		
 		controller.setPosition(5, 7);
     
     	MvcResult result = mockMvc.perform(get("/info")
+            .param("session", token)
             .param("x", "5")
             .param("y", "7"))
         .andExpect(status().isOk())
@@ -192,12 +212,44 @@ class ServerApplicationTests {
 	@Order(4)
 	void infoRequestInvalidCoordinate() throws Exception {
 
+		// First login to get a token
+		MvcResult loginResult = mockMvc.perform(post("/login")
+			.contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(valid)))
+        	.andExpect(status().isOk())
+			.andReturn();
+		
+		String token = returnReceivedToken(loginResult);
+		
 		controller.setPosition(3, 3);
     
     	mockMvc.perform(get("/info")
+            .param("session", token)
             .param("x", "6")
             .param("y", "7"))
         .andExpect(status().isNoContent());
+
+	}
+
+	@Test
+	@Order(7)
+	void infoRequestWithoutValidSession() throws Exception {
+    
+    	mockMvc.perform(get("/info")
+            .param("x", "5")
+            .param("y", "5"))
+        .andExpect(status().isUnauthorized());
+
+	}
+
+	@Test
+	@Order(8)
+	void moveRequestWithoutValidSession() throws Exception {
+    
+    	mockMvc.perform(get("/move")
+            .param("dx", "1")
+            .param("dy", "0"))
+        .andExpect(status().isUnauthorized());
 
 	}
 
