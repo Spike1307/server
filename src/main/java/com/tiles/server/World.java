@@ -1,14 +1,10 @@
 package com.tiles.server;
 
-//import java.io.BufferedReader;
-//import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
-import java.io.File;
+
 import java.util.Arrays;
-//import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -16,10 +12,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-//import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Component
 public class World {
