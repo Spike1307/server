@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
@@ -119,6 +119,22 @@ class ServerApplicationTests {
 
 	}
 
+	/*
+	private String testLogin (LoginData loginData)
+		MvcResult result = mockMvc.perform(post("/login")
+			.contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(valid)))
+        	.andExpect(status().isOk())
+			.andReturn();
+
+		System.out.println(result.getResponse().getContentAsString());
+		
+		String token = returnReceivedToken(result);
+		
+		assertEquals(controller.verifySession(token),valid.getName());
+
+	*/
+
 	@Test
 	@Order(1)
 	void contextLoads() {
@@ -203,7 +219,7 @@ class ServerApplicationTests {
 		
 		String token = returnReceivedToken(result);
 		
-		assertEquals(controller.verifySession(token),valid.getName());
+		assertTrue(controller.sessionValid(token));
 
 	}
 

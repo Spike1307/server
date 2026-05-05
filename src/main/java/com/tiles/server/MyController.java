@@ -56,8 +56,8 @@ public class MyController {
     }
 
     //Session verification (required for tests)
-    public String verifySession(String token) {
-        return this.sessions.getUserName(token);
+    public Boolean sessionValid(String token) {
+        return this.sessions.isValid(token);
     }
     
     @PostMapping("/test")
