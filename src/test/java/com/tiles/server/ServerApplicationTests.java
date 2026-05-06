@@ -92,6 +92,7 @@ class ServerApplicationTests {
 
 	private static String testToken;
 
+	
 	@Autowired
     private MockMvc mockMvc;
 
