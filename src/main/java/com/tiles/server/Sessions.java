@@ -3,17 +3,17 @@ package com.tiles.server;
 import java.util.HashMap;
 
 public class Sessions {
-    private HashMap<String, String> tokens;
+    private HashMap<String, PlayerData> tokens;
 
     public Sessions() {
         tokens = new HashMap<>();
     }
 
     public void addSession(String token, String name) {
-        tokens.put(token, name);
+        tokens.put(token, new PlayerData(name));
     }
 
-    public String logOut(String token) {
+    public PlayerData logOut(String token) {
         return tokens.remove(token);
     }
 
@@ -31,4 +31,8 @@ public class Sessions {
     public boolean isValid(String token) {
         return tokens.containsKey(token);
     }
+
+    //TODO
+    //methods for accessing PlayerData attributes
+
 }
