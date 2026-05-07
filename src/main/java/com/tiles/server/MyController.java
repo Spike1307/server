@@ -103,16 +103,11 @@ public class MyController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } 
 
-        //TODO
-        //Get AccountDetails file read working
-        //      maybe try? https://www.geeksforgeeks.org/advance-java/read-file-from-resources-folder-in-spring-boot/
         
     }
 
     @GetMapping("/logout")
     public ResponseEntity<String> handleLogOut(@RequestParam String session) {
-        
-        //sessions.list();
 
         //If session key is currently in use and valid, remove it
         if (sessions.logOut(session) != null) {
