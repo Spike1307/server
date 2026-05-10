@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import org.springframework.core.io.ClassPathResource;
@@ -52,6 +55,10 @@ public class World {
             MAP = reader.lines()
                 .map(String::trim)
                 .filter(line -> !line.isEmpty()) // skip empty lines
+                .filter(line -> line.matches("["))
+                .for
+                //.map(line -> line.substring())
+                //.map(line -> line.transform())
                 .map(line -> line.split(", "))  
                 .filter(parts -> parts.length == MAP_WIDTH) //Skip lines missing entries.
                 .map(parts -> Arrays.stream(parts)
@@ -110,6 +117,20 @@ public class World {
         System.out.println("Terrain key:");
         terrains.forEach((k, v) ->
                     System.out.println(k + " | " + v.description + " | " + v.blocking));
+
+    }
+
+    //Helper method, applies regex to load map
+    private static String[] parseLine(String line, Pattern pattern) {
+
+        Matcher matcher = pattern.matcher(line);
+        ArrayList<String> tilesList = new ArrayList<>();
+
+        while (matcher.find()) {
+            tilesList.add(matcher.group(1));
+        }
+
+        return tilesList.toArray(new String[tilesList.size()]);
 
     }
 
