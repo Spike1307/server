@@ -48,6 +48,7 @@ public class World {
         //String map = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
         ClassPathResource resource = new ClassPathResource("Map.txt"); 
+        Pattern pattern = Pattern.compile("'([^']*)'"); //Take contents between each: ' ' 
     
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
 
@@ -55,17 +56,10 @@ public class World {
             MAP = reader.lines()
                 .map(String::trim)
                 .filter(line -> !line.isEmpty()) // skip empty lines
-                .filter(line -> line.matches("["))
-                .for
-                //.map(line -> line.substring())
-                //.map(line -> line.transform())
-                .map(line -> line.split(", "))  
+                .filter(line -> line.matches("\\[.+\\],")) //matches general expected line structure
+                .map(line -> parseLine(line, pattern))   
                 .filter(parts -> parts.length == MAP_WIDTH) //Skip lines missing entries.
-                .map(parts -> Arrays.stream(parts)
-                                    .map(element -> element.substring(1,2))
-                                    .toArray(String[]::new))
                 .toArray(String[][]::new);
-
 
         } catch (IOException e) {
 
