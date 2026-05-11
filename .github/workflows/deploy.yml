@@ -23,4 +23,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/quest-shaper:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
