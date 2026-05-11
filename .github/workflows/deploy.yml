@@ -21,6 +21,23 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: .devcontainer
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+    - name: Deploy to EC2 via SSH
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        script: |
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
+          docker stop app || true
+          docker rm app || true
+          docker run -d --name app -p 8000:8000 ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
+          
