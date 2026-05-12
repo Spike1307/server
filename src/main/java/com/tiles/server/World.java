@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import org.springframework.core.io.ClassPathResource;
@@ -45,6 +48,7 @@ public class World {
         //String map = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
         ClassPathResource resource = new ClassPathResource("Map.txt"); 
+        Pattern pattern = Pattern.compile("'([^']*)'"); //Take contents between each: ' ' 
     
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
 
@@ -52,13 +56,10 @@ public class World {
             MAP = reader.lines()
                 .map(String::trim)
                 .filter(line -> !line.isEmpty()) // skip empty lines
-                .map(line -> line.split(", "))  
+                .filter(line -> line.matches("\\[.+\\],")) //matches general expected line structure
+                .map(line -> parseLine(line, pattern))   
                 .filter(parts -> parts.length == MAP_WIDTH) //Skip lines missing entries.
-                .map(parts -> Arrays.stream(parts)
-                                    .map(element -> element.substring(1,2))
-                                    .toArray(String[]::new))
                 .toArray(String[][]::new);
-
 
         } catch (IOException e) {
 
@@ -110,6 +111,20 @@ public class World {
         System.out.println("Terrain key:");
         terrains.forEach((k, v) ->
                     System.out.println(k + " | " + v.description + " | " + v.blocking));
+
+    }
+
+    //Helper method, applies regex to load map
+    private static String[] parseLine(String line, Pattern pattern) {
+
+        Matcher matcher = pattern.matcher(line);
+        ArrayList<String> tilesList = new ArrayList<>();
+
+        while (matcher.find()) {
+            tilesList.add(matcher.group(1));
+        }
+
+        return tilesList.toArray(new String[tilesList.size()]);
 
     }
 
