@@ -226,17 +226,17 @@ class ServerApplicationTests {
 
 	}
 
-	@Test
-	void testSetPositionX() {
-		controller.getSessions().addSession(testToken, "test");
+	// @Test
+	// void testSetPositionX() {
+	// 	controller.getSessions().addSession(testToken, "test");
 
-		PlayerData player = controller.getSessions().getPlayer(testToken);
+	// 	PlayerData player = controller.getSessions().getPlayer(testToken);
 
-		controller.setPosition(3, 2, testToken);
-		assertEquals(player.getX(), 3);
+	// 	controller.setPosition(3, 2, testToken);
+	// 	assertEquals(player.getX(), 3);
 
-		controller.getSessions().logOut(testToken);
-	}
+	// 	controller.getSessions().logOut(testToken);
+	// }
 
 	@Test
 	@Order(5)

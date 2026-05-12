@@ -142,8 +142,16 @@ public class MyController {
 
         //Player specific location
         PlayerData player = sessions.getPlayer(session);
+        
+        //Position seems to persist on client side after log out which can cause issues when having a default location for PlayerData objects
+        //This sets the player's location to wherever it is at login
+        //The other option is to reset the map window to the default on logout
+        if ((player.getX() == 5 && x != 5) && (player.getY() == 5 && player.getX() != 5)){
+            player.setPos(x, y);
+        }
+
         int playerX = player.getX();
-        int playerY = player.getX();
+        int playerY = player.getY();
         
         System.out.println("Info request: x=" + x + ", y=" + y);
         
@@ -201,7 +209,7 @@ public class MyController {
         //Player specific location
         PlayerData player = sessions.getPlayer(session);
         int playerX = player.getX();
-        int playerY = player.getX();
+        int playerY = player.getY();
         
         System.out.println("Move request: dy=" + dy + ", dx=" + dx);
 
@@ -245,6 +253,8 @@ public class MyController {
         //Move request is valid, update stored player location on server
         playerX = proposedNewX;
         playerY = proposedNewY;
+
+        player.setPos(proposedNewX, proposedNewY);
         
         System.out.println("New player position: x=" + playerX + ", y=" + playerY);
         

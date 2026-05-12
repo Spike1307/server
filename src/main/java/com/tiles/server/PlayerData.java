@@ -31,9 +31,15 @@ public class PlayerData {
         return this.yPos;
     }
 
+    public int getIcon() {
+        return this.characterIcon;
+    }
+
     public void setPos(int x, int y) {
         this.xPos = x;
         this.yPos = y;
     }
+
+    
 
 }
