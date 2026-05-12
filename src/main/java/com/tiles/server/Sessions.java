@@ -32,7 +32,8 @@ public class Sessions {
         return tokens.containsKey(token);
     }
 
-    //TODO
-    //methods for accessing PlayerData attributes
+    public PlayerData getPlayer(String token) {
+        return tokens.get(token);
+    }
 
 }

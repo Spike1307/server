@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -226,6 +227,18 @@ class ServerApplicationTests {
 	}
 
 	@Test
+	void testSetPositionX() {
+		controller.getSessions().addSession(testToken, "test");
+
+		PlayerData player = controller.getSessions().getPlayer(testToken);
+
+		controller.setPosition(3, 2, testToken);
+		assertEquals(player.getX(), 3);
+
+		controller.getSessions().logOut(testToken);
+	}
+
+	@Test
 	@Order(5)
 	void infoReturnDefaultMapWindow() throws Exception {
 		
@@ -257,7 +270,9 @@ class ServerApplicationTests {
 	@Order(6)
 	void infoReturnMovedMapWindow() throws Exception {
 		
-		controller.setPosition(5, 7);
+		controller.getSessions().addSession(testToken, "test");
+		
+		controller.setPosition(5, 7, testToken);
     
     	MvcResult result = mockMvc.perform(get("/info")
             .param("session", testToken)
@@ -281,13 +296,15 @@ class ServerApplicationTests {
 		
 		assertArrayEquals(MovedMapWindow, receivedMapWindow);
 
+		controller.getSessions().logOut(testToken);
+
 	}
 
 	@Test
 	@Order(7)
 	void infoRequestInvalidCoordinate() throws Exception {
 		
-		controller.setPosition(3, 3);
+		controller.setPosition(3, 3, testToken);
     
     	mockMvc.perform(get("/info")
             .param("session", testToken)

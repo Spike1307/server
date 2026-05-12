@@ -11,12 +11,29 @@ public class PlayerData {
 
     public PlayerData(String name) {
         this.username = name;
+
+        //Setting Default start position
+        xPos = 5;
+        yPos = 5;
+
+        characterIcon = 1; //default just for testing
     }
 
     public String getUsername() {
         return this.username;
     }
 
-    //TODO
-    //methods for accessing PlayerData attributes
+    public int getX() {
+        return this.xPos;
+    }
+    
+    public int getY() {
+        return this.yPos;
+    }
+
+    public void setPos(int x, int y) {
+        this.xPos = x;
+        this.yPos = y;
+    }
+
 }
