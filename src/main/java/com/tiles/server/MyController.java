@@ -153,12 +153,26 @@ public class MyController {
             for (int col = 0; col < viewWidth; col++) {
                 int mapY = top + row;
                 int mapX = left + col;
-                
-                // Check bounds
-                if (mapY < 0 || mapY >= this.world.getHeight() || mapX < 0 || mapX >= this.world.getWidth()) {
+
+                // Check vertically for black boundary squares
+                if (mapY < 0 || mapY >= this.world.getHeight()) { 
+
                     mapWindow[row][col] = " ";
+
                 } else {
+
+                    //Check for and apply x left wrap
+                    if (mapX < 0) {
+                        mapX = this.world.getWidth() + mapX; 
+                    }
+
+                    //Check for and apply x right wrap
+                    if (mapX >= this.world.getWidth()) {
+                        mapX = mapX - this.world.getWidth(); 
+                    }
+
                     mapWindow[row][col] = this.world.getMap()[mapY][mapX]; //MAP[mapY][mapX] 
+                    
                 }
             }
         }
