@@ -162,7 +162,24 @@ public class World {
 
     public boolean isBlocking(int Y, int X) {
 
-         return this.terrains.get(this.MAP[Y][X]).blocking;
+        String tile = this.MAP[Y][X];
+      
+        //Check for unit tile
+        if (tile.length() == 1) {
+            return this.terrains.get(tile).blocking;
+        } 
+        
+        //Check for bridge case
+        if (tile.charAt(1) == 'b') {
+            return false;
+        }
+
+        //Check for closed door case
+        if (tile.charAt(1) == 'D') {
+            return true;
+        }
+
+        return this.terrains.get(tile.substring(0,1)).blocking;
 
     }
 
