@@ -21,7 +21,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .devcontainer
+          context: .
+          file: Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
   deploy:
@@ -39,5 +40,5 @@ jobs:
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
           sudo docker stop app || true
           sudo docker rm app || true
-          sudo docker run -d --name app -p 8000:8000 ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
+          sudo docker run -d --name app -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
           
