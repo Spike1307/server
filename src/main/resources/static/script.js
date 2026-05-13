@@ -31,7 +31,7 @@ var posY = 5;
 const animation_time = 100; // 100 milliseconds = 10 frames per second.
 
 // Server address.
-var server_addr = "http://localhost:8000";
+var server_addr = window.location.origin;
 
 // Location of asset files.
 const asset_path = "/assets/64x64/";
@@ -459,7 +459,8 @@ var gameArea = {
 		return rgx.test(navigator.userAgent);
 	},
 	reset: function() {
-		server_addr = this.server.value;
+		server_addr = this.server.value || window.location.origin;
+		this.server.value = server_addr;
 		fetch_map_and_refresh();
 	},
 	start : function() {
