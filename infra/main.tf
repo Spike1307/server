@@ -66,7 +66,7 @@ resource "aws_instance" "app" {
     systemctl start docker
     systemctl enable docker
     usermod -aG docker ec2-user
-    docker run -d --name app -p 80:80 ${var.dockerhub_username}/week9-tutorial:latest
+    docker run -d --name app -p 80:80 ${var.dockerhub_username}/tileserver:latest
   EOF
 
   tags = {

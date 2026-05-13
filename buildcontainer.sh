@@ -12,4 +12,4 @@ echo "Building Docker image..."
 docker build -t tileserver:latest .
 
 echo "Running container on http://localhost:8000"
-docker run -p 8000:8000 tileserver:latest
+docker run -p 8000:80 tileserver:latest
