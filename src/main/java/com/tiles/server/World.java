@@ -144,6 +144,10 @@ public class World {
         return this.MAP;
     }
 
+    public String getTile(int Y, int X) {
+        return this.MAP[Y][X];
+    }
+    
     public Map<String, tileInfo> getTerrains() {
         return this.terrains;
     }

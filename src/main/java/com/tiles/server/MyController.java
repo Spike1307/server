@@ -171,7 +171,7 @@ public class MyController {
                         mapX = mapX - this.world.getWidth(); 
                     }
 
-                    mapWindow[row][col] = this.world.getMap()[mapY][mapX]; //MAP[mapY][mapX] 
+                    mapWindow[row][col] = this.world.getTile(mapY,mapX); //MAP[mapY][mapX] 
                     
                 }
             }
