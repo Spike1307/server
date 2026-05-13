@@ -192,8 +192,9 @@ public class MyController {
         int proposedNewX = playerX + dx;
         int proposedNewY = playerY + dy;
 
-        //Check for going beyond map boundary
-        if (!((proposedNewX >= 0 && proposedNewX < this.world.getWidth()) && (proposedNewY >= 0 && proposedNewY < this.world.getHeight()))) { 
+        //Check for going beyond map height boundary
+        if ((proposedNewY >= 0 && proposedNewY < this.world.getHeight()) == false) { 
+            System.out.println("Movement blocked by map height boundary");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }  
 
@@ -202,7 +203,19 @@ public class MyController {
             System.out.println("Movement blocked by: " + this.world.getTileDescription(proposedNewY, proposedNewX));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+
+        //Check and adjust for left wrapping
+        if (proposedNewX < 0) {
+                proposedNewX = this.world.getWidth() - 1;
+                System.out.println("Left wrap");
+        } 
         
+        //Check and adjust for right wrapping
+        if (proposedNewX >= this.world.getWidth()) {
+                proposedNewX = 0;
+                System.out.println("Right wrap");
+        }  
+
         //Not sure if this wrapping/clamping logic is needed, but left just in case - DS
         /* 
         // Wrap x coordinate
@@ -219,7 +232,7 @@ public class MyController {
             newY = MAP_HEIGHT - 1;
         }
         */
-
+        
         //Move request is valid, update stored player location on server
         playerX = proposedNewX;
         playerY = proposedNewY;
