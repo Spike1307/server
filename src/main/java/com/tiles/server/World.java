@@ -183,11 +183,13 @@ public class World {
 
     }
 
+    /* - Deprecated, more trouble than it's worth - DS
     public String getTileDescription(int Y, int X) {
 
         return this.terrains.get(this.MAP[Y][X]).description;
     
     }
+    */
 
 }
 

@@ -213,11 +213,11 @@ public class MyController {
         }  
 
         //Check for moving into blocking terrain
-        if(this.world.isBlocking(proposedNewY,proposedNewX) == true) {
-            System.out.println("Movement blocked by: " + this.world.getTileDescription(proposedNewY, proposedNewX));
+        if(this.world.isBlocking(proposedNewY,proposedNewX)) {
+            System.out.println("Movement blocked by terrain");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-
+        
         //Check and adjust for left wrapping
         if (proposedNewX < 0) {
                 proposedNewX = this.world.getWidth() - 1;
