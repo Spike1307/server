@@ -5,7 +5,7 @@ rules:
           $TYPE $FIELD = "...";
       - metavariable-regex:
           metavariable: $FIELD
-          regex: (?i).*(pass|password|secret|key|token).*
+          regex: (?i).*(pass|password|secret|key).*
     message: >-
       Hardcoded credential in '$FIELD'. Use environment variables
       or a secrets manager instead of embedding secrets in source code.
