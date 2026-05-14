@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'temurin' # Options include temurin, zulu, adopt, etc.
+          distribution: 'temurin'
          
       - name: Build JAR
         run: mvn package -DskipTests
