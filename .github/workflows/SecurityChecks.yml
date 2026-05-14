@@ -24,4 +24,4 @@ jobs:
       - name: Scan Docker image with Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/refs/tags/v0.69.3/contrib/install.sh | sh -s -- -b /usr/local/bin v0.69.3
-          trivy image --severity HIGH,CRITICAL --exit-code 1 my-app
+          trivy image --severity HIGH,CRITICAL --exit-code 1 tileserver
