@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build JAR
-        run: mvn clean package -DskipTests
+        run: mvn package -DskipTests
 
       - name: Build Docker image
         run: docker build -t my-app .
