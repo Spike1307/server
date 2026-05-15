@@ -155,6 +155,14 @@ public class MyController {
         int playerY = player.getY();
         
         System.out.println("Info request: x=" + x + ", y=" + y);
+
+        
+        if (!player.getSpawned()) {
+            x = playerX;
+            y = playerY;
+
+            player.hasSpawned();
+        }
         
         //Return status 204 and exit early, if received coordinates do not match current player location stored on server
         if (x!=playerX||y!=playerY) {
@@ -166,6 +174,7 @@ public class MyController {
         int viewHeight = 11;
         int viewMiddleX = viewWidth / 2;
         int viewMiddleY = viewHeight / 2;
+
         
         // Calculate window bounds
         int top = y - viewMiddleY;
