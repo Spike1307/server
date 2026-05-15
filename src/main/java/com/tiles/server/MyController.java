@@ -143,13 +143,16 @@ public class MyController {
 
         //Player specific location
         PlayerData player = sessions.getPlayer(session);
+
         
+        //--Depecrecated bandaid fix for /info desync when relogging --
+        //--Replaced with position reset        
         //Position seems to persist on client side after log out which can cause issues when having a default location for PlayerData objects
         //This sets the player's location to wherever it is at login
         //The other option is to reset the map window to the default on logout
-        if ((player.getX() == 100) && (player.getY() == 100)){ // these could also be == null but would need Integer wrapping
-            player.setPos(x, y);
-        }
+        // if ((player.getX() == 100) && (player.getY() == 100)){ // these could also be == null but would need Integer wrapping
+        //     player.setPos(x, y);
+        // }
 
         int playerX = player.getX();
         int playerY = player.getY();

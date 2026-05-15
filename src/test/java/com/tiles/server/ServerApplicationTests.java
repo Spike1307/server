@@ -313,7 +313,7 @@ class ServerApplicationTests {
 
 		controller.getSessions().addSession(testToken, "test");
 		
-		//Any param is valid on first call so that the position resets
+		//Any param is valid on first call so that the position resets on log in
 		//This allows the test to treat this not as a first call
 		controller.getSessions().getPlayer(testToken).hasSpawned();
 		
