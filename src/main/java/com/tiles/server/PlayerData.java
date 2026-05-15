@@ -1,6 +1,7 @@
 package com.tiles.server;
 
 public class PlayerData {
+    
     private String username;
     private String encPass; //do we need to store this here because we already have the AccountDetails
                             //if we are going to store, can just look up from AccountDetails
@@ -8,7 +9,7 @@ public class PlayerData {
     private int xPos;
     private int yPos;
 
-    public Boolean spawned;
+    private boolean spawned;
     //will need an inventory as well -- maybe an array of Item (make class) objects
 
     public PlayerData(String name) {
@@ -29,7 +30,7 @@ public class PlayerData {
         return this.username;
     }
 
-    public Boolean getSpawned() {
+    public boolean getSpawned() {
         return this.spawned;
     }
 

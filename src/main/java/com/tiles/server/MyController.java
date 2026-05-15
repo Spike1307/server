@@ -171,6 +171,11 @@ public class MyController {
         if (x!=playerX||y!=playerY) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+
+        
+        //draw new icon
+        world.drawIcon(playerY, playerX, player.getIcon());
+        
         
         // Define view window (11x11 centered on player)
         int viewWidth = 11;
@@ -244,6 +249,9 @@ public class MyController {
         if((Math.abs(dy)+Math.abs(dx)) > 1) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+
+        int prevX = playerX;
+        int prevY = playerY;
         
         //Record proposed new player position
         int proposedNewX = playerX + dx;
@@ -295,6 +303,8 @@ public class MyController {
         playerY = proposedNewY;
 
         player.setPos(proposedNewX, proposedNewY);
+
+        world.eraseIcon(prevY, prevX, player.getIcon());
         
         System.out.println("New player position: x=" + playerX + ", y=" + playerY);
         
