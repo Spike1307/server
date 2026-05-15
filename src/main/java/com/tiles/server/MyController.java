@@ -147,7 +147,7 @@ public class MyController {
         //Position seems to persist on client side after log out which can cause issues when having a default location for PlayerData objects
         //This sets the player's location to wherever it is at login
         //The other option is to reset the map window to the default on logout
-        if ((player.getX() == 100) || (player.getY() == 100)){
+        if ((player.getX() == 100) && (player.getY() == 100)){ // these could also be == null but would need Integer wrapping
             player.setPos(x, y);
         }
 
@@ -155,6 +155,14 @@ public class MyController {
         int playerY = player.getY();
         
         System.out.println("Info request: x=" + x + ", y=" + y);
+
+        
+        if (!player.getSpawned()) {
+            x = playerX;
+            y = playerY;
+
+            player.hasSpawned();
+        }
         
         //Return status 204 and exit early, if received coordinates do not match current player location stored on server
         if (x!=playerX||y!=playerY) {
@@ -166,6 +174,7 @@ public class MyController {
         int viewHeight = 11;
         int viewMiddleX = viewWidth / 2;
         int viewMiddleY = viewHeight / 2;
+
         
         // Calculate window bounds
         int top = y - viewMiddleY;

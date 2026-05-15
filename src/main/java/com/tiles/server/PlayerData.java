@@ -7,6 +7,8 @@ public class PlayerData {
     private int characterIcon; //not sure how we will do this but int for now
     private int xPos;
     private int yPos;
+
+    public Boolean spawned;
     //will need an inventory as well -- maybe an array of Item (make class) objects
 
     public PlayerData(String name) {
@@ -15,14 +17,24 @@ public class PlayerData {
         //Setting Default start position
         //will change to 5 when window reset is working -- right now takes value from info query
         //Is currently 100 to avoid Integer wrapping
-        xPos = 100; 
-        yPos = 100;
+        xPos = 5; 
+        yPos = 5;
 
         characterIcon = asciiSum(name) % 10; //default just for testing
+
+        spawned = false;
     }
 
     public String getUsername() {
         return this.username;
+    }
+
+    public Boolean getSpawned() {
+        return this.spawned;
+    }
+
+    public void hasSpawned() {
+        this.spawned = true;
     }
 
     public int getX() {

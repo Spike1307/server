@@ -313,6 +313,10 @@ class ServerApplicationTests {
 
 		controller.getSessions().addSession(testToken, "test");
 		
+		//Any param is valid on first call so that the position resets
+		//This allows the test to treat this not as a first call
+		controller.getSessions().getPlayer(testToken).hasSpawned();
+		
 		controller.setPosition(3, 3, testToken);
     
     	mockMvc.perform(get("/info")
