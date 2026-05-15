@@ -16,9 +16,11 @@ import org.springframework.http.HttpStatus;
 @CrossOrigin(origins = "*")
 public class MyController {
 	
-	// Simple game state tracking
-	private int playerX = 5;
-	private int playerY = 5;
+	// Simple game state tracking -- changing in favour of player specific tracking -- 
+    //      maybe leave for testing or should be able to modify tests because of the testToken
+
+	// private int playerX = 5;
+	// private int playerY = 5;
 	
 	// Map dimensions
 	//private static final int MAP_WIDTH = 20; - now held in World class - DS
@@ -45,9 +47,18 @@ public class MyController {
     }
 
     //Position Setter (required for tests)
-    public void setPosition(int newX, int newY) { 
-        this.playerX = newX; 
-        this.playerY = newY;
+    public void setPosition(int newX, int newY, String token) { 
+        // this.playerX = newX; 
+        // this.playerY = newY;
+
+        //modifying method to account for player tracking
+        PlayerData player = sessions.getPlayer(token);
+        player.setPos(newX, newY);
+    }
+
+    //Session Getter (required for tests)
+    public Sessions getSessions(){
+        return this.sessions;
     }
 
     //Map Getter (required for tests)
@@ -94,6 +105,7 @@ public class MyController {
 
             //Add token as key to HashMap tracking current sessions
             sessions.addSession(token, loginData.getName());
+            System.out.println("character icon = " + sessions.getPlayer(token).getIcon());
 
             //Return response with JSON formatted token
             return new ResponseEntity<>("{\"session\": " + "\"" + token + "\"}", HttpStatus.OK);
@@ -111,6 +123,7 @@ public class MyController {
 
         //If session key is currently in use and valid, remove it
         if (sessions.logOut(session) != null) {
+            sessions.list();
             return new ResponseEntity<>(HttpStatus.OK);
         }
 
@@ -127,6 +140,19 @@ public class MyController {
         if (!sessions.isValid(session)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+
+        //Player specific location
+        PlayerData player = sessions.getPlayer(session);
+        
+        //Position seems to persist on client side after log out which can cause issues when having a default location for PlayerData objects
+        //This sets the player's location to wherever it is at login
+        //The other option is to reset the map window to the default on logout
+        if ((player.getX() == 100) || (player.getY() == 100)){
+            player.setPos(x, y);
+        }
+
+        int playerX = player.getX();
+        int playerY = player.getY();
         
         System.out.println("Info request: x=" + x + ", y=" + y);
         
@@ -194,6 +220,11 @@ public class MyController {
         if (!sessions.isValid(session)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+
+        //Player specific location
+        PlayerData player = sessions.getPlayer(session);
+        int playerX = player.getX();
+        int playerY = player.getY();
         
         System.out.println("Move request: dy=" + dy + ", dx=" + dx);
 
@@ -250,6 +281,8 @@ public class MyController {
         //Move request is valid, update stored player location on server
         playerX = proposedNewX;
         playerY = proposedNewY;
+
+        player.setPos(proposedNewX, proposedNewY);
         
         System.out.println("New player position: x=" + playerX + ", y=" + playerY);
         
