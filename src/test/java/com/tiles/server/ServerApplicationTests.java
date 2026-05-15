@@ -224,6 +224,9 @@ class ServerApplicationTests {
 
 		testToken = token;
 
+		// remove sessions to not affect subsequent tests
+		controller.getSessions().logOut(token);
+
 	}
 
 	// @Test
@@ -241,6 +244,8 @@ class ServerApplicationTests {
 	@Test
 	@Order(5)
 	void infoReturnDefaultMapWindow() throws Exception {
+
+		controller.getSessions().addSession(testToken, "test");
 		
     	MvcResult result = mockMvc.perform(get("/info")
             .param("session", testToken)
@@ -263,6 +268,8 @@ class ServerApplicationTests {
       		.forEach(System.out::println);
 		
 		assertArrayEquals(DefaultMapWindow, receivedMapWindow);
+
+		controller.getSessions().logOut(testToken);
 
 	}
 
@@ -303,6 +310,8 @@ class ServerApplicationTests {
 	@Test
 	@Order(7)
 	void infoRequestInvalidCoordinate() throws Exception {
+
+		controller.getSessions().addSession(testToken, "test");
 		
 		controller.setPosition(3, 3, testToken);
     
@@ -312,6 +321,7 @@ class ServerApplicationTests {
             .param("y", "7"))
         .andExpect(status().isNoContent());
 
+		controller.getSessions().logOut(testToken);		
 	}
 
 	@Test
@@ -351,6 +361,8 @@ class ServerApplicationTests {
 	@Test
 	@Order(10)
 	void goodLogout() throws Exception {
+
+		controller.getSessions().addSession(testToken, "test");
 
 		mockMvc.perform(get("/logout" )
 				.queryParam("session", testToken))
