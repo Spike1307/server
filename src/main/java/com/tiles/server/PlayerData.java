@@ -13,10 +13,12 @@ public class PlayerData {
         this.username = name;
 
         //Setting Default start position
-        xPos = 5;
-        yPos = 5;
+        //will change to 5 when window reset is working -- right now takes value from info query
+        //Is currently 100 to avoid Integer wrapping
+        xPos = 100; 
+        yPos = 100;
 
-        characterIcon = 1; //default just for testing
+        characterIcon = asciiSum(name) % 10; //default just for testing
     }
 
     public String getUsername() {
@@ -33,6 +35,14 @@ public class PlayerData {
 
     public int getIcon() {
         return this.characterIcon;
+    }
+
+    private int asciiSum(String name) {
+        if (name.isEmpty()) {
+            return 0;
+        }
+
+        return name.charAt(0) + asciiSum(name.substring(1));
     }
 
     public void setPos(int x, int y) {
