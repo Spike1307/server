@@ -181,12 +181,26 @@ public class MyController {
             for (int col = 0; col < viewWidth; col++) {
                 int mapY = top + row;
                 int mapX = left + col;
-                
-                // Check bounds
-                if (mapY < 0 || mapY >= this.world.getHeight() || mapX < 0 || mapX >= this.world.getWidth()) {
+
+                // Check vertically for black boundary squares
+                if (mapY < 0 || mapY >= this.world.getHeight()) { 
+
                     mapWindow[row][col] = " ";
+
                 } else {
-                    mapWindow[row][col] = this.world.getMap()[mapY][mapX]; //MAP[mapY][mapX] 
+
+                    //Check for and apply x left wrap
+                    if (mapX < 0) {
+                        mapX = this.world.getWidth() + mapX; 
+                    }
+
+                    //Check for and apply x right wrap
+                    if (mapX >= this.world.getWidth()) {
+                        mapX = mapX - this.world.getWidth(); 
+                    }
+
+                    mapWindow[row][col] = this.world.getTile(mapY,mapX); //MAP[mapY][mapX] 
+                    
                 }
             }
         }
@@ -225,17 +239,30 @@ public class MyController {
         int proposedNewX = playerX + dx;
         int proposedNewY = playerY + dy;
 
-        //Check for going beyond map boundary
-        if (!((proposedNewX >= 0 && proposedNewX < this.world.getWidth()) && (proposedNewY >= 0 && proposedNewY < this.world.getHeight()))) { 
+        //Check for going beyond map height boundary
+        if ((proposedNewY >= 0 && proposedNewY < this.world.getHeight()) == false) { 
+            System.out.println("Movement blocked by map height boundary");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }  
 
+        //Check and adjust for left wrapping
+        if (proposedNewX < 0) {
+                proposedNewX = this.world.getWidth() - 1;
+                System.out.println("Left wrap");
+        } 
+        
+        //Check and adjust for right wrapping
+        if (proposedNewX >= this.world.getWidth()) {
+                proposedNewX = 0;
+                System.out.println("Right wrap");
+        }
+
         //Check for moving into blocking terrain
-        if(this.world.isBlocking(proposedNewY,proposedNewX) == true) {
-            System.out.println("Movement blocked by: " + this.world.getTileDescription(proposedNewY, proposedNewX));
+        if(this.world.isBlocking(proposedNewY,proposedNewX)) {
+            System.out.println("Movement blocked by terrain");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        
+
         //Not sure if this wrapping/clamping logic is needed, but left just in case - DS
         /* 
         // Wrap x coordinate
@@ -252,7 +279,7 @@ public class MyController {
             newY = MAP_HEIGHT - 1;
         }
         */
-
+        
         //Move request is valid, update stored player location on server
         playerX = proposedNewX;
         playerY = proposedNewY;
