@@ -147,7 +147,7 @@ public class MyController {
         //Position seems to persist on client side after log out which can cause issues when having a default location for PlayerData objects
         //This sets the player's location to wherever it is at login
         //The other option is to reset the map window to the default on logout
-        if ((player.getX() == 100) || (player.getY() == 100)){
+        if ((player.getX() == 100) && (player.getY() == 100)){ // these could also be == null but would need Integer wrapping
             player.setPos(x, y);
         }
 
