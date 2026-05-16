@@ -27,7 +27,7 @@ public class World {
     private String[][] MAP = new String[MAP_HEIGHT][MAP_WIDTH];
 
     // Record to store the terrain details (second + third columns from terrain text file)
-    private record tileInfo(String description, boolean blocking) {}
+    public record tileInfo(String description, boolean blocking) {}
 
     private Map<String, tileInfo> terrains;
     
@@ -160,26 +160,34 @@ public class World {
         return MAP_HEIGHT;
     }
 
-    public boolean isBlocking(int Y, int X) {
+    public tileInfo isBlocking(int Y, int X) {
 
         String tile = this.MAP[Y][X];
       
         //Check for unit tile
         if (tile.length() == 1) {
-            return this.terrains.get(tile).blocking;
+            return this.terrains.get(tile);
         } 
         
         //Check for bridge case
         if (tile.charAt(1) == 'b') {
-            return false;
+            return this.terrains.get("b");
         }
 
         //Check for closed door case
         if (tile.charAt(1) == 'D') {
-            return true;
+            return this.terrains.get("D");
         }
 
-        return this.terrains.get(tile.substring(0,1)).blocking;
+        return this.terrains.get(tile.substring(0,1));
+
+    }
+
+    public char take(int Y, int X) {
+
+        String tile = this.MAP[Y][X];
+
+        tile.indexOf('a');
 
     }
 
