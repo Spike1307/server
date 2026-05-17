@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public class PlayerData {
+    
     private String username;
     private String encPass; //do we need to store this here because we already have the AccountDetails
                             //if we are going to store, can just look up from AccountDetails
@@ -11,7 +12,7 @@ public class PlayerData {
     private int xPos;
     private int yPos;
 
-    public Boolean spawned;
+    private Boolean spawned;
 
     private ArrayList<Item> inventory = new ArrayList<Item>();
     private static final int maxItems = 3;
@@ -34,7 +35,7 @@ public class PlayerData {
         return this.username;
     }
 
-    public Boolean getSpawned() {
+    public boolean getSpawned() {
         return this.spawned;
     }
 

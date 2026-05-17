@@ -107,6 +107,9 @@ public class MyController {
             sessions.addSession(token, loginData.getName());
             System.out.println("character icon = " + sessions.getPlayer(token).getIcon());
 
+            // PlayerData player = sessions.getPlayer(token);
+            // world.drawIcon(player.getY(), player.getX(), player.getIcon());
+
             //Return response with JSON formatted token
             return new ResponseEntity<>("{\"session\": " + "\"" + token + "\"}", HttpStatus.OK);
 
@@ -121,11 +124,23 @@ public class MyController {
     @GetMapping("/logout")
     public ResponseEntity<String> handleLogOut(@RequestParam String session) {
 
-        //If session key is currently in use and valid, remove it
-        if (sessions.logOut(session) != null) {
-            sessions.list();
+        if (sessions.isValid(session)){
+            PlayerData player = sessions.getPlayer(session);
+            
+            System.out.println(player.getUsername() + " logged out");
+            world.eraseIcon(player.getY(), player.getX(), player.getIcon());
+
+            sessions.logOut(session);
             return new ResponseEntity<>(HttpStatus.OK);
         }
+
+        //If session key is currently in use and valid, remove it
+        // if (sessions.logOut(session) != null) {
+        //     //sessions.list();
+        //     System.out.println(name + " logged out");
+        //     world.eraseIcon(y, x, icon);
+        //     return new ResponseEntity<>(HttpStatus.OK);
+        // }
 
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
@@ -143,20 +158,23 @@ public class MyController {
 
         //Player specific location
         PlayerData player = sessions.getPlayer(session);
+
         
+        //--Depecrecated bandaid fix for /info desync when relogging --
+        //--Replaced with position reset        
         //Position seems to persist on client side after log out which can cause issues when having a default location for PlayerData objects
         //This sets the player's location to wherever it is at login
         //The other option is to reset the map window to the default on logout
-        if ((player.getX() == 100) && (player.getY() == 100)){ // these could also be == null but would need Integer wrapping
-            player.setPos(x, y);
-        }
+        // if ((player.getX() == 100) && (player.getY() == 100)){ // these could also be == null but would need Integer wrapping
+        //     player.setPos(x, y);
+        // }
 
         int playerX = player.getX();
         int playerY = player.getY();
         
         System.out.println("Info request: x=" + x + ", y=" + y);
 
-        
+        //reset position on first login
         if (!player.getSpawned()) {
             x = playerX;
             y = playerY;
@@ -168,6 +186,10 @@ public class MyController {
         if (x!=playerX||y!=playerY) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+        
+        //draw new icon
+        //drawing in /info seems to be the most responsive but its still not always perfect
+        world.drawIcon(playerY, playerX, player.getIcon());
         
         // Define view window (11x11 centered on player)
         int viewWidth = 11;
@@ -241,6 +263,9 @@ public class MyController {
         if((Math.abs(dy)+Math.abs(dx)) > 1) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+
+        int prevX = playerX;
+        int prevY = playerY;
         
         //Record proposed new player position
         int proposedNewX = playerX + dx;
@@ -292,6 +317,8 @@ public class MyController {
         playerY = proposedNewY;
 
         player.setPos(proposedNewX, proposedNewY);
+
+        world.eraseIcon(prevY, prevX, player.getIcon());
         
         System.out.println("New player position: x=" + playerX + ", y=" + playerY);
         
