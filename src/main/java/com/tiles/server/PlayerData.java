@@ -1,6 +1,7 @@
 package com.tiles.server;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class PlayerData {
     private String username;
@@ -12,7 +13,7 @@ public class PlayerData {
 
     public Boolean spawned;
 
-    private ArrayList<String> inventory = new ArrayList<String>();
+    private ArrayList<Item> inventory = new ArrayList<Item>();
     private static final int maxItems = 3;
 
     public PlayerData(String name) {
@@ -66,17 +67,34 @@ public class PlayerData {
         this.yPos = y;
     }
 
-    public String storeItem (String item) {
+    public Optional<Item> storeItem (Item item) {
 
         //Check if there is room
         if(this.inventory.size()==maxItems) {
-            return "full";
+            return Optional.of(item); //Return to sender
         }
 
         //Check if there is already an identical item class stored
         for (int i = 0; i < this.inventory.size(); i++ ) {
-            this.inventory.get(i) 
+
+            if(item.getType() == this.inventory.get(i).getType()) {
+                
+                //Effect swap
+                Item drop = this.inventory.get(i);
+                this.inventory.remove(i);
+
+                this.inventory.add(item);
+
+                return Optional.of(drop);
+
+            } 
+
         }
+
+        //Otherwise, if there is room and no identical item class already stored:
+        this.inventory.add(item);
+        return Optional.empty();
+
     }
 
 }
