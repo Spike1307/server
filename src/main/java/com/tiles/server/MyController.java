@@ -107,6 +107,9 @@ public class MyController {
             sessions.addSession(token, loginData.getName());
             System.out.println("character icon = " + sessions.getPlayer(token).getIcon());
 
+            // PlayerData player = sessions.getPlayer(token);
+            // world.drawIcon(player.getY(), player.getX(), player.getIcon());
+
             //Return response with JSON formatted token
             return new ResponseEntity<>("{\"session\": " + "\"" + token + "\"}", HttpStatus.OK);
 
@@ -159,7 +162,7 @@ public class MyController {
         
         System.out.println("Info request: x=" + x + ", y=" + y);
 
-        
+        //reset position on first login
         if (!player.getSpawned()) {
             x = playerX;
             y = playerY;
@@ -171,11 +174,9 @@ public class MyController {
         if (x!=playerX||y!=playerY) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-
         
         //draw new icon
         world.drawIcon(playerY, playerX, player.getIcon());
-        
         
         // Define view window (11x11 centered on player)
         int viewWidth = 11;

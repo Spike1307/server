@@ -55,6 +55,8 @@ class ServerApplicationTests {
 		{"g", "g", "g", "g", "g", "g", "g", "g", "g", "g", "W", "g", "g", "g", "g", "g", "g", "g", "g", "g",},
 	};
 
+	//test map windows include character icon for the test account
+
 	private static final String[][] DefaultMapWindow = {
 		{"g", "g", "g", "g", "g", "g", "g", "g", "g", ".", "W"},
 		{"S", "S", "S", "S", "S", "S", "g", "g", "g", "g", "W"},
@@ -246,6 +248,12 @@ class ServerApplicationTests {
 	void infoReturnDefaultMapWindow() throws Exception {
 
 		controller.getSessions().addSession(testToken, "test");
+		PlayerData player = controller.getSessions().getPlayer(testToken);
+		
+		String[][] characterDefaultMapWindow = DefaultMapWindow;
+
+		//adding character icon to default map
+		characterDefaultMapWindow[5][5] += player.getIcon();
 		
     	MvcResult result = mockMvc.perform(get("/info")
             .param("session", testToken)
@@ -267,7 +275,7 @@ class ServerApplicationTests {
       		.map(Arrays::toString)
       		.forEach(System.out::println);
 		
-		assertArrayEquals(DefaultMapWindow, receivedMapWindow);
+		assertArrayEquals(characterDefaultMapWindow, receivedMapWindow);
 
 		controller.getSessions().logOut(testToken);
 
@@ -279,7 +287,14 @@ class ServerApplicationTests {
 		
 		controller.getSessions().addSession(testToken, "test");
 		
-		controller.setPosition(5, 7, testToken);
+		PlayerData player = controller.getSessions().getPlayer(testToken);
+		//adding player character to test map
+		String[][] characterMovedMapWindow = MovedMapWindow;
+		characterMovedMapWindow[5][5] += player.getIcon();
+		
+		//move to new position
+		mockMvc.perform(get("/move").param("session", testToken).param("dx", "0").param("dy", "1"));
+		mockMvc.perform(get("/move").param("session", testToken).param("dx", "0").param("dy", "1"));
     
     	MvcResult result = mockMvc.perform(get("/info")
             .param("session", testToken)
@@ -301,7 +316,7 @@ class ServerApplicationTests {
       		.map(Arrays::toString)
       		.forEach(System.out::println);
 		
-		assertArrayEquals(MovedMapWindow, receivedMapWindow);
+		assertArrayEquals(characterMovedMapWindow, receivedMapWindow);
 
 		controller.getSessions().logOut(testToken);
 
