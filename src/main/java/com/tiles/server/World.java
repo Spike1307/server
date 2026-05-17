@@ -147,7 +147,19 @@ public class World {
     public String getTile(int Y, int X) {
         return this.MAP[Y][X];
     }
-    
+
+    public void drawIcon(int Y, int X, int icon){
+        String tile = getTile(Y,X) + icon;
+        this.MAP[Y][X] = tile;
+    }
+
+     public void eraseIcon(int Y, int X, int icon){
+        //replace instead of substring to not assume the player will alwas be the 
+        //final char
+        String tile = getTile(Y,X).replace(Integer.toString(icon), "");
+        this.MAP[Y][X] = tile;
+    }
+
     public Map<String, tileInfo> getTerrains() {
         return this.terrains;
     }
