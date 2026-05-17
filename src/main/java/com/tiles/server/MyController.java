@@ -124,21 +124,11 @@ public class MyController {
     @GetMapping("/logout")
     public ResponseEntity<String> handleLogOut(@RequestParam String session) {
 
-        String name ="";
-        int x = 0;
-        int y = 0;
-        int icon = 0;
-
         if (sessions.isValid(session)){
             PlayerData player = sessions.getPlayer(session);
             
-            name = sessions.getPlayer(session).getUsername();
-            x = sessions.getPlayer(session).getX();
-            y = sessions.getPlayer(session).getY();
-            icon = sessions.getPlayer(session).getIcon();
-
-            System.out.println(name + " logged out");
-            world.eraseIcon(y, x, icon);
+            System.out.println(player.getUsername() + " logged out");
+            world.eraseIcon(player.getY(), player.getX(), player.getIcon());
 
             sessions.logOut(session);
             return new ResponseEntity<>(HttpStatus.OK);

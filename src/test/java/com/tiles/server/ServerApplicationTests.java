@@ -292,10 +292,15 @@ class ServerApplicationTests {
 		String[][] characterMovedMapWindow = MovedMapWindow;
 		characterMovedMapWindow[5][5] += player.getIcon();
 		
-		//move to new position
-		mockMvc.perform(get("/move").param("session", testToken).param("dx", "0").param("dy", "1"));
-		mockMvc.perform(get("/move").param("session", testToken).param("dx", "0").param("dy", "1"));
-    
+		//move to new position -- changed so info test is not dependent on move
+		// mockMvc.perform(get("/move").param("session", testToken).param("dx", "0").param("dy", "1"));
+		// mockMvc.perform(get("/move").param("session", testToken).param("dx", "0").param("dy", "1"));
+		
+		//simulated /move -- move to new position and erase old one
+		controller.setPosition(5, 7, testToken);
+		String tile = controller.getMap()[5][5].replace(Integer.toString(player.getIcon()), "");
+		controller.getMap()[5][5] = tile;
+
     	MvcResult result = mockMvc.perform(get("/info")
             .param("session", testToken)
             .param("x", "5")
