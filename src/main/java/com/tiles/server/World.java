@@ -2,6 +2,7 @@ package com.tiles.server;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import java.io.BufferedReader;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -27,14 +29,19 @@ public class World {
     private String[][] MAP = new String[MAP_HEIGHT][MAP_WIDTH];
 
     // Record to store the terrain details (second + third columns from terrain text file)
-    private record tileInfo(String description, boolean blocking) {}
+    public record tileInfo(String description, boolean blocking) {}
+
+    // Record to store item details (second + third columns from items text file)
+    //public record itemInfo(String description, String type) {}
 
     private Map<String, tileInfo> terrains;
+    private ArrayList<Item> items = new ArrayList<Item>();
     
     public World() {
        
         loadMap();
         loadTerrainLegend();
+        loadItems();
 
     }
 
@@ -114,6 +121,33 @@ public class World {
 
     }
 
+    private void loadItems() {
+
+        ClassPathResource resource = new ClassPathResource("Items.txt"); 
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
+
+            items = reader.lines()
+                .map(String::trim)
+                .filter(line -> !line.isEmpty()) // skip empty lines
+                .map(line -> line.split("\\s*\\|\\s*"))  //split regex handles '|' delimeter with optional padding on either side.
+                .filter(parts -> parts.length == 3) //Skip lines missing entries.
+                .map(parts -> new Item(parts[0], parts[1], parts[2]))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        } catch (IOException e) {
+
+            throw new RuntimeException("Unable to load items list!", e);
+
+        }
+        
+        System.out.println("Items list:");
+        for(int i = 0; i < items.size(); i++) {
+            System.out.println(items.get(i).getID() + " | " + items.get(i).getDesc() + " | " + items.get(i).getType());
+        }
+
+    }
+
     //Helper method, applies regex to load map
     private static String[] parseLine(String line, Pattern pattern) {
 
@@ -172,26 +206,79 @@ public class World {
         return MAP_HEIGHT;
     }
 
-    public boolean isBlocking(int Y, int X) {
+    public tileInfo isBlocking(int Y, int X) {
 
         String tile = this.MAP[Y][X];
       
         //Check for unit tile
         if (tile.length() == 1) {
-            return this.terrains.get(tile).blocking;
+            return this.terrains.get(tile);
         } 
         
         //Check for bridge case
         if (tile.charAt(1) == 'b') {
-            return false;
+            return this.terrains.get("b");
         }
 
         //Check for closed door case
         if (tile.charAt(1) == 'D') {
-            return true;
+            return this.terrains.get("D");
         }
 
-        return this.terrains.get(tile.substring(0,1)).blocking;
+        return this.terrains.get(tile.substring(0,1));
+
+    }
+
+    public Optional<Item> take(int Y, int X) {
+
+        String tile = this.MAP[Y][X];
+
+        for (int i = 0; i < this.items.size(); i++) {
+            
+            if (tile.contains(this.items.get(i).getID())) {
+                
+                tile.replace(this.items.get(i).getID(), ""); //remove the item from the tile
+                return Optional.of(this.items.get(i));
+
+            }
+
+        }
+
+        return Optional.empty(); //no items found on tile
+
+    }
+
+    public Optional<Item> place(int Y, int X, Item item) {
+
+        String tile = this.MAP[Y][X];
+
+        //Check if an item already exists at this tile
+        for (int i = 0; i < this.items.size(); i++) {
+            
+            if (tile.contains(this.items.get(i).getID())) {
+                
+                return Optional.of(this.items.get(i));
+
+            }
+
+        }
+    
+        //If no item already exists at tile, then place item:
+        //First check if there is player recorded at last character of tile string:
+        String tileLastChar = tile.substring(tile.length()-1,tile.length()); //peration works with unit strings
+        if (tileLastChar.matches("[0-9]")) { 
+
+            //You can assume that if there is a player number present, the tile string contains at least 2 chars
+            tile = tile.substring(0,tile.length()-1) + item.getID() + tileLastChar;
+
+        } else {
+
+            tile = tile + item.getID();
+
+        }
+
+        this.MAP[Y][X] = tile; //update map with new item
+        return Optional.empty();
 
     }
 
