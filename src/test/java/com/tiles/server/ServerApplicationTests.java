@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -53,6 +54,8 @@ class ServerApplicationTests {
 		{"g", "g", "g", "g", "g", "W", "W", "W", "g", "g", "W", "W", "g", "g", "g", "g", "t", "g", "g", "g",},
 		{"g", "g", "g", "g", "g", "g", "g", "g", "g", "g", "W", "g", "g", "g", "g", "g", "g", "g", "g", "g",},
 	};
+
+	//test map windows include character icon for the test account
 
 	private static final String[][] DefaultMapWindow = {
 		{"g", "g", "g", "g", "g", "g", "g", "g", "g", ".", "W"},
@@ -223,11 +226,34 @@ class ServerApplicationTests {
 
 		testToken = token;
 
+		// remove sessions to not affect subsequent tests
+		controller.getSessions().logOut(token);
+
 	}
+
+	// @Test
+	// void testSetPositionX() {
+	// 	controller.getSessions().addSession(testToken, "test");
+
+	// 	PlayerData player = controller.getSessions().getPlayer(testToken);
+
+	// 	controller.setPosition(3, 2, testToken);
+	// 	assertEquals(player.getX(), 3);
+
+	// 	controller.getSessions().logOut(testToken);
+	// }
 
 	@Test
 	@Order(5)
 	void infoReturnDefaultMapWindow() throws Exception {
+
+		controller.getSessions().addSession(testToken, "test");
+		PlayerData player = controller.getSessions().getPlayer(testToken);
+		
+		String[][] characterDefaultMapWindow = DefaultMapWindow;
+
+		//adding character icon to default map
+		characterDefaultMapWindow[5][5] += player.getIcon();
 		
     	MvcResult result = mockMvc.perform(get("/info")
             .param("session", testToken)
@@ -249,7 +275,9 @@ class ServerApplicationTests {
       		.map(Arrays::toString)
       		.forEach(System.out::println);
 		
-		assertArrayEquals(DefaultMapWindow, receivedMapWindow);
+		assertArrayEquals(characterDefaultMapWindow, receivedMapWindow);
+
+		controller.getSessions().logOut(testToken);
 
 	}
 
@@ -257,8 +285,22 @@ class ServerApplicationTests {
 	@Order(6)
 	void infoReturnMovedMapWindow() throws Exception {
 		
-		controller.setPosition(5, 7);
-    
+		controller.getSessions().addSession(testToken, "test");
+		
+		PlayerData player = controller.getSessions().getPlayer(testToken);
+		//adding player character to test map
+		String[][] characterMovedMapWindow = MovedMapWindow;
+		characterMovedMapWindow[5][5] += player.getIcon();
+		
+		//move to new position -- changed so info test is not dependent on move
+		// mockMvc.perform(get("/move").param("session", testToken).param("dx", "0").param("dy", "1"));
+		// mockMvc.perform(get("/move").param("session", testToken).param("dx", "0").param("dy", "1"));
+		
+		//simulated /move -- move to new position and erase old one
+		controller.setPosition(5, 7, testToken);
+		String tile = controller.getMap()[5][5].replace(Integer.toString(player.getIcon()), "");
+		controller.getMap()[5][5] = tile;
+
     	MvcResult result = mockMvc.perform(get("/info")
             .param("session", testToken)
             .param("x", "5")
@@ -279,15 +321,23 @@ class ServerApplicationTests {
       		.map(Arrays::toString)
       		.forEach(System.out::println);
 		
-		assertArrayEquals(MovedMapWindow, receivedMapWindow);
+		assertArrayEquals(characterMovedMapWindow, receivedMapWindow);
+
+		controller.getSessions().logOut(testToken);
 
 	}
 
 	@Test
 	@Order(7)
 	void infoRequestInvalidCoordinate() throws Exception {
+
+		controller.getSessions().addSession(testToken, "test");
 		
-		controller.setPosition(3, 3);
+		//Any param is valid on first call so that the position resets on log in
+		//This allows the test to treat this not as a first call
+		controller.getSessions().getPlayer(testToken).hasSpawned();
+		
+		controller.setPosition(3, 3, testToken);
     
     	mockMvc.perform(get("/info")
             .param("session", testToken)
@@ -295,6 +345,7 @@ class ServerApplicationTests {
             .param("y", "7"))
         .andExpect(status().isNoContent());
 
+		controller.getSessions().logOut(testToken);		
 	}
 
 	@Test
@@ -334,6 +385,8 @@ class ServerApplicationTests {
 	@Test
 	@Order(10)
 	void goodLogout() throws Exception {
+
+		controller.getSessions().addSession(testToken, "test");
 
 		mockMvc.perform(get("/logout" )
 				.queryParam("session", testToken))

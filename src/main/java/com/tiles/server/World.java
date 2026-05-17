@@ -144,6 +144,22 @@ public class World {
         return this.MAP;
     }
 
+    public String getTile(int Y, int X) {
+        return this.MAP[Y][X];
+    }
+
+    public void drawIcon(int Y, int X, int icon){
+        String tile = getTile(Y,X) + icon;
+        this.MAP[Y][X] = tile;
+    }
+
+     public void eraseIcon(int Y, int X, int icon){
+        //replace instead of substring to not assume the player will alwas be the 
+        //final char
+        String tile = getTile(Y,X).replace(Integer.toString(icon), "");
+        this.MAP[Y][X] = tile;
+    }
+
     public Map<String, tileInfo> getTerrains() {
         return this.terrains;
     }
@@ -158,15 +174,34 @@ public class World {
 
     public boolean isBlocking(int Y, int X) {
 
-         return this.terrains.get(this.MAP[Y][X]).blocking;
+        String tile = this.MAP[Y][X];
+      
+        //Check for unit tile
+        if (tile.length() == 1) {
+            return this.terrains.get(tile).blocking;
+        } 
+        
+        //Check for bridge case
+        if (tile.charAt(1) == 'b') {
+            return false;
+        }
+
+        //Check for closed door case
+        if (tile.charAt(1) == 'D') {
+            return true;
+        }
+
+        return this.terrains.get(tile.substring(0,1)).blocking;
 
     }
 
+    /* - Deprecated, more trouble than it's worth - DS
     public String getTileDescription(int Y, int X) {
 
         return this.terrains.get(this.MAP[Y][X]).description;
     
     }
+    */
 
 }
 

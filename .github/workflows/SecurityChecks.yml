@@ -1,0 +1,35 @@
+name: Security Checks
+
+on: [push, pull_request]
+
+jobs:
+  scan-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan source code with Semgrep
+        run: |
+          pip3 install semgrep
+          semgrep --config .semgrep.yml --config auto --error src/main/java/
+
+  scan-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+         
+      - name: Build JAR
+        run: mvn package -DskipTests
+
+      - name: Build Docker image
+        run: docker build -t my-app .
+
+      - name: Scan Docker image with Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/refs/tags/v0.69.3/contrib/install.sh | sh -s -- -b /usr/local/bin v0.69.3
+          trivy image --severity HIGH,CRITICAL --exit-code 1 my-app

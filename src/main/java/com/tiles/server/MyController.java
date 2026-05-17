@@ -20,9 +20,11 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class MyController {
 	
-	// Simple game state tracking
-	private int playerX = 5;
-	private int playerY = 5;
+	// Simple game state tracking -- changing in favour of player specific tracking -- 
+    //      maybe leave for testing or should be able to modify tests because of the testToken
+
+	// private int playerX = 5;
+	// private int playerY = 5;
 	
 	// Map dimensions
 	//private static final int MAP_WIDTH = 20; - now held in World class - DS
@@ -63,9 +65,18 @@ public class MyController {
     }
 
     //Position Setter (required for tests)
-    public void setPosition(int newX, int newY) { 
-        this.playerX = newX; 
-        this.playerY = newY;
+    public void setPosition(int newX, int newY, String token) { 
+        // this.playerX = newX; 
+        // this.playerY = newY;
+
+        //modifying method to account for player tracking
+        PlayerData player = sessions.getPlayer(token);
+        player.setPos(newX, newY);
+    }
+
+    //Session Getter (required for tests)
+    public Sessions getSessions(){
+        return this.sessions;
     }
 
     //Map Getter (required for tests)
@@ -112,6 +123,10 @@ public class MyController {
 
             //Add token as key to HashMap tracking current sessions
             sessions.addSession(token, loginData.getName());
+            System.out.println("character icon = " + sessions.getPlayer(token).getIcon());
+
+            // PlayerData player = sessions.getPlayer(token);
+            // world.drawIcon(player.getY(), player.getX(), player.getIcon());
 
             //Return response with JSON formatted token
             return new ResponseEntity<>("{\"session\": " + "\"" + token + "\"}", HttpStatus.OK);
@@ -127,10 +142,23 @@ public class MyController {
     @GetMapping("/logout")
     public ResponseEntity<String> handleLogOut(@RequestParam String session) {
 
-        //If session key is currently in use and valid, remove it
-        if (sessions.logOut(session) != null) {
+        if (sessions.isValid(session)){
+            PlayerData player = sessions.getPlayer(session);
+            
+            System.out.println(player.getUsername() + " logged out");
+            world.eraseIcon(player.getY(), player.getX(), player.getIcon());
+
+            sessions.logOut(session);
             return new ResponseEntity<>(HttpStatus.OK);
         }
+
+        //If session key is currently in use and valid, remove it
+        // if (sessions.logOut(session) != null) {
+        //     //sessions.list();
+        //     System.out.println(name + " logged out");
+        //     world.eraseIcon(y, x, icon);
+        //     return new ResponseEntity<>(HttpStatus.OK);
+        // }
 
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
@@ -145,19 +173,48 @@ public class MyController {
         if (!sessions.isValid(session)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+
+        //Player specific location
+        PlayerData player = sessions.getPlayer(session);
+
+        
+        //--Depecrecated bandaid fix for /info desync when relogging --
+        //--Replaced with position reset        
+        //Position seems to persist on client side after log out which can cause issues when having a default location for PlayerData objects
+        //This sets the player's location to wherever it is at login
+        //The other option is to reset the map window to the default on logout
+        // if ((player.getX() == 100) && (player.getY() == 100)){ // these could also be == null but would need Integer wrapping
+        //     player.setPos(x, y);
+        // }
+
+        int playerX = player.getX();
+        int playerY = player.getY();
         
         System.out.println("Info request: x=" + x + ", y=" + y);
+
+        //reset position on first login
+        if (!player.getSpawned()) {
+            x = playerX;
+            y = playerY;
+
+            player.hasSpawned();
+        }
         
         //Return status 204 and exit early, if received coordinates do not match current player location stored on server
         if (x!=playerX||y!=playerY) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         
+        //draw new icon
+        //drawing in /info seems to be the most responsive but its still not always perfect
+        world.drawIcon(playerY, playerX, player.getIcon());
+        
         // Define view window (11x11 centered on player)
         int viewWidth = 11;
         int viewHeight = 11;
         int viewMiddleX = viewWidth / 2;
         int viewMiddleY = viewHeight / 2;
+
         
         // Calculate window bounds
         int top = y - viewMiddleY;
@@ -171,12 +228,26 @@ public class MyController {
             for (int col = 0; col < viewWidth; col++) {
                 int mapY = top + row;
                 int mapX = left + col;
-                
-                // Check bounds
-                if (mapY < 0 || mapY >= this.world.getHeight() || mapX < 0 || mapX >= this.world.getWidth()) {
+
+                // Check vertically for black boundary squares
+                if (mapY < 0 || mapY >= this.world.getHeight()) { 
+
                     mapWindow[row][col] = " ";
+
                 } else {
-                    mapWindow[row][col] = this.world.getMap()[mapY][mapX]; //MAP[mapY][mapX] 
+
+                    //Check for and apply x left wrap
+                    if (mapX < 0) {
+                        mapX = this.world.getWidth() + mapX; 
+                    }
+
+                    //Check for and apply x right wrap
+                    if (mapX >= this.world.getWidth()) {
+                        mapX = mapX - this.world.getWidth(); 
+                    }
+
+                    mapWindow[row][col] = this.world.getTile(mapY,mapX); //MAP[mapY][mapX] 
+                    
                 }
             }
         }
@@ -199,6 +270,11 @@ public class MyController {
         if (!sessions.isValid(session)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+
+        //Player specific location
+        PlayerData player = sessions.getPlayer(session);
+        int playerX = player.getX();
+        int playerY = player.getY();
         
         System.out.println("Move request: dy=" + dy + ", dx=" + dx);
 
@@ -206,22 +282,38 @@ public class MyController {
         if((Math.abs(dy)+Math.abs(dx)) > 1) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+
+        int prevX = playerX;
+        int prevY = playerY;
         
         //Record proposed new player position
         int proposedNewX = playerX + dx;
         int proposedNewY = playerY + dy;
 
-        //Check for going beyond map boundary
-        if (!((proposedNewX >= 0 && proposedNewX < this.world.getWidth()) && (proposedNewY >= 0 && proposedNewY < this.world.getHeight()))) { 
+        //Check for going beyond map height boundary
+        if ((proposedNewY >= 0 && proposedNewY < this.world.getHeight()) == false) { 
+            System.out.println("Movement blocked by map height boundary");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }  
 
+        //Check and adjust for left wrapping
+        if (proposedNewX < 0) {
+                proposedNewX = this.world.getWidth() - 1;
+                System.out.println("Left wrap");
+        } 
+        
+        //Check and adjust for right wrapping
+        if (proposedNewX >= this.world.getWidth()) {
+                proposedNewX = 0;
+                System.out.println("Right wrap");
+        }
+
         //Check for moving into blocking terrain
-        if(this.world.isBlocking(proposedNewY,proposedNewX) == true) {
-            System.out.println("Movement blocked by: " + this.world.getTileDescription(proposedNewY, proposedNewX));
+        if(this.world.isBlocking(proposedNewY,proposedNewX)) {
+            System.out.println("Movement blocked by terrain");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        
+
         //Not sure if this wrapping/clamping logic is needed, but left just in case - DS
         /* 
         // Wrap x coordinate
@@ -238,10 +330,14 @@ public class MyController {
             newY = MAP_HEIGHT - 1;
         }
         */
-
+        
         //Move request is valid, update stored player location on server
         playerX = proposedNewX;
         playerY = proposedNewY;
+
+        player.setPos(proposedNewX, proposedNewY);
+
+        world.eraseIcon(prevY, prevX, player.getIcon());
         
         System.out.println("New player position: x=" + playerX + ", y=" + playerY);
         
