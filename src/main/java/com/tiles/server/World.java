@@ -29,12 +29,17 @@ public class World {
     // Record to store the terrain details (second + third columns from terrain text file)
     public record tileInfo(String description, boolean blocking) {}
 
+    // Record to store item details (second + third columns from items text file)
+    public record itemInfo(String description, String type) {}
+
     private Map<String, tileInfo> terrains;
+    private Map<String, itemInfo> items;
     
     public World() {
        
         loadMap();
         loadTerrainLegend();
+        loadItems();
 
     }
 
@@ -114,6 +119,37 @@ public class World {
 
     }
 
+    private void loadItems() {
+
+        ClassPathResource resource = new ClassPathResource("Items.txt"); 
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
+
+            items = reader.lines()
+                .map(String::trim)
+                .filter(line -> !line.isEmpty()) // skip empty lines
+                .map(line -> line.split("\\s*\\|\\s*"))  //split regex handles '|' delimeter with optional padding on either side.
+                .filter(parts -> parts.length == 3) //Skip lines missing entries.
+                .collect(Collectors.toMap(
+                        parts -> parts[0].substring(0,1), //single character key (as string)
+                        parts -> new itemInfo(
+                                parts[1], //Item description
+                                parts[2] //Item class
+                        )));
+        
+
+        } catch (IOException e) {
+
+            throw new RuntimeException("Unable to load items list!", e);
+
+        }
+        
+        System.out.println("Items list:");
+        items.forEach((k, v) ->
+                    System.out.println(k + " | " + v.description + " | " + v.type));
+
+    }
+
     //Helper method, applies regex to load map
     private static String[] parseLine(String line, Pattern pattern) {
 
@@ -183,6 +219,7 @@ public class World {
 
     }
 
+    /* 
     public char take(int Y, int X) {
 
         String tile = this.MAP[Y][X];
@@ -190,7 +227,7 @@ public class World {
         tile.indexOf('a');
 
     }
-
+    */
     /* - Deprecated, more trouble than it's worth - DS
     public String getTileDescription(int Y, int X) {
 
