@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -31,10 +32,10 @@ public class World {
     public record tileInfo(String description, boolean blocking) {}
 
     // Record to store item details (second + third columns from items text file)
-    public record itemInfo(String description, String type) {}
+    //public record itemInfo(String description, String type) {}
 
     private Map<String, tileInfo> terrains;
-    private Map<String, itemInfo> items;
+    private ArrayList<Item> items = new ArrayList<Item>();
     
     public World() {
        
@@ -131,13 +132,8 @@ public class World {
                 .filter(line -> !line.isEmpty()) // skip empty lines
                 .map(line -> line.split("\\s*\\|\\s*"))  //split regex handles '|' delimeter with optional padding on either side.
                 .filter(parts -> parts.length == 3) //Skip lines missing entries.
-                .collect(Collectors.toMap(
-                        parts -> parts[0].substring(0,1), //single character key (as string)
-                        parts -> new itemInfo(
-                                parts[1], //Item description
-                                parts[2] //Item class
-                        )));
-        
+                .map(parts -> new Item(parts[0], parts[1], parts[2]))
+                .collect(Collectors.toCollection(ArrayList::new));
 
         } catch (IOException e) {
 
@@ -146,8 +142,9 @@ public class World {
         }
         
         System.out.println("Items list:");
-        items.forEach((k, v) ->
-                    System.out.println(k + " | " + v.description + " | " + v.type));
+        for(int i = 0; i < items.size(); i++) {
+            System.out.println(items.get(i).getID() + " | " + items.get(i).getDesc() + " | " + items.get(i).getType());
+        }
 
     }
 
@@ -220,60 +217,56 @@ public class World {
 
     }
 
-    public String take(int Y, int X) {
+    public Optional<Item> take(int Y, int X) {
 
         String tile = this.MAP[Y][X];
 
-        String[] itemKeys = items.keySet().stream().toArray(String[]::new);
-
-        for (int i = 0; i < itemKeys.length; i++) {
+        for (int i = 0; i < this.items.size(); i++) {
             
-            if (tile.contains(itemKeys[i])) {
+            if (tile.contains(this.items.get(i).getID())) {
                 
-                tile.replace(itemKeys[i], ""); //remove the item from the tile
-                return itemKeys[i];
+                tile.replace(this.items.get(i).getID(), ""); //remove the item from the tile
+                return Optional.of(this.items.get(i));
 
             }
 
         }
 
-        return null; //no items found on tile
+        return Optional.empty(); //no items found on tile
 
     }
 
-    public String place(int Y, int X, String item) {
+    public Optional<Item> place(int Y, int X, Item item) {
 
         String tile = this.MAP[Y][X];
 
-        String[] itemKeys = items.keySet().stream().toArray(String[]::new);
-
         //Check if an item already exists at this tile
-        for (int i = 0; i < itemKeys.length; i++) {
+        for (int i = 0; i < this.items.size(); i++) {
             
-            if (tile.contains(itemKeys[i])) {
+            if (tile.contains(this.items.get(i).getID())) {
                 
-                return itemKeys[i]; //signal what was blocking the placement
+                return Optional.of(this.items.get(i));
 
             }
 
         }
     
-        //If no item exists at tile, then place item:
+        //If no item already exists at tile, then place item:
         //First check if there is player recorded at last character of tile string:
         String tileLastChar = tile.substring(tile.length()-1,tile.length()); //peration works with unit strings
         if (tileLastChar.matches("[0-9]")) { 
 
             //You can assume that if there is a player number present, the tile string contains at least 2 chars
-            tile = tile.substring(0,tile.length()-1) + item + tileLastChar;
+            tile = tile.substring(0,tile.length()-1) + item.getID() + tileLastChar;
 
         } else {
 
-            tile = tile + item;
+            tile = tile + item.getID();
 
         }
 
         this.MAP[Y][X] = tile; //update map with new item
-        return "placed";
+        return Optional.empty();
 
     }
 

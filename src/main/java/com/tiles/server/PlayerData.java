@@ -1,5 +1,7 @@
 package com.tiles.server;
 
+import java.util.ArrayList;
+
 public class PlayerData {
     private String username;
     private String encPass; //do we need to store this here because we already have the AccountDetails
@@ -9,7 +11,9 @@ public class PlayerData {
     private int yPos;
 
     public Boolean spawned;
-    //will need an inventory as well -- maybe an array of Item (make class) objects
+
+    private ArrayList<String> inventory = new ArrayList<String>();
+    private static final int maxItems = 3;
 
     public PlayerData(String name) {
         this.username = name;
@@ -62,6 +66,17 @@ public class PlayerData {
         this.yPos = y;
     }
 
-    
+    public String storeItem (String item) {
+
+        //Check if there is room
+        if(this.inventory.size()==maxItems) {
+            return "full";
+        }
+
+        //Check if there is already an identical item class stored
+        for (int i = 0; i < this.inventory.size(); i++ ) {
+            this.inventory.get(i) 
+        }
+    }
 
 }
