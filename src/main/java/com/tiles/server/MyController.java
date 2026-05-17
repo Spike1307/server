@@ -124,11 +124,33 @@ public class MyController {
     @GetMapping("/logout")
     public ResponseEntity<String> handleLogOut(@RequestParam String session) {
 
-        //If session key is currently in use and valid, remove it
-        if (sessions.logOut(session) != null) {
-            sessions.list();
+        String name ="";
+        int x = 0;
+        int y = 0;
+        int icon = 0;
+
+        if (sessions.isValid(session)){
+            PlayerData player = sessions.getPlayer(session);
+            
+            name = sessions.getPlayer(session).getUsername();
+            x = sessions.getPlayer(session).getX();
+            y = sessions.getPlayer(session).getY();
+            icon = sessions.getPlayer(session).getIcon();
+
+            System.out.println(name + " logged out");
+            world.eraseIcon(y, x, icon);
+
+            sessions.logOut(session);
             return new ResponseEntity<>(HttpStatus.OK);
         }
+
+        //If session key is currently in use and valid, remove it
+        // if (sessions.logOut(session) != null) {
+        //     //sessions.list();
+        //     System.out.println(name + " logged out");
+        //     world.eraseIcon(y, x, icon);
+        //     return new ResponseEntity<>(HttpStatus.OK);
+        // }
 
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
@@ -176,6 +198,7 @@ public class MyController {
         }
         
         //draw new icon
+        //drawing in /info seems to be the most responsive but its still not always perfect
         world.drawIcon(playerY, playerX, player.getIcon());
         
         // Define view window (11x11 centered on player)
