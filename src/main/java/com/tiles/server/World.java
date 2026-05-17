@@ -2,6 +2,7 @@ package com.tiles.server;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import java.io.BufferedReader;
 
 import java.util.ArrayList;
@@ -237,6 +238,42 @@ public class World {
         }
 
         return null; //no items found on tile
+
+    }
+
+    public String place(int Y, int X, String item) {
+
+        String tile = this.MAP[Y][X];
+
+        String[] itemKeys = items.keySet().stream().toArray(String[]::new);
+
+        //Check if an item already exists at this tile
+        for (int i = 0; i < itemKeys.length; i++) {
+            
+            if (tile.contains(itemKeys[i])) {
+                
+                return itemKeys[i]; //signal what was blocking the placement
+
+            }
+
+        }
+    
+        //If no item exists at tile, then place item:
+        //First check if there is player recorded at last character of tile string:
+        String tileLastChar = tile.substring(tile.length()-1,tile.length()); //peration works with unit strings
+        if (tileLastChar.matches("[0-9]")) { 
+
+            //You can assume that if there is a player number present, the tile string contains at least 2 chars
+            tile = tile.substring(0,tile.length()-1) + item + tileLastChar;
+
+        } else {
+
+            tile = tile + item;
+
+        }
+
+        this.MAP[Y][X] = tile; //update map with new item
+        return "placed";
 
     }
 
