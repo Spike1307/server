@@ -219,15 +219,27 @@ public class World {
 
     }
 
-    /* 
-    public char take(int Y, int X) {
+    public String take(int Y, int X) {
 
         String tile = this.MAP[Y][X];
 
-        tile.indexOf('a');
+        String[] itemKeys = items.keySet().stream().toArray(String[]::new);
+
+        for (int i = 0; i < itemKeys.length; i++) {
+            
+            if (tile.contains(itemKeys[i])) {
+                
+                tile.replace(itemKeys[i], ""); //remove the item from the tile
+                return itemKeys[i];
+
+            }
+
+        }
+
+        return null; //no items found on tile
 
     }
-    */
+
     /* - Deprecated, more trouble than it's worth - DS
     public String getTileDescription(int Y, int X) {
 
