@@ -1,5 +1,8 @@
 package com.tiles.server;
 
+import java.util.ArrayList;
+import java.util.Optional;
+
 public class PlayerData {
     
     private String username;
@@ -9,8 +12,10 @@ public class PlayerData {
     private int xPos;
     private int yPos;
 
-    private boolean spawned;
-    //will need an inventory as well -- maybe an array of Item (make class) objects
+    private Boolean spawned;
+
+    private ArrayList<Item> inventory = new ArrayList<Item>();
+    private static final int maxItems = 3;
 
     public PlayerData(String name) {
         this.username = name;
@@ -63,6 +68,48 @@ public class PlayerData {
         this.yPos = y;
     }
 
-    
+    public Optional<Item> storeItem (Item item) {
+
+        //Check if there is room
+        if(this.inventory.size()==maxItems) {
+            return Optional.of(item); //Return to sender
+        }
+
+        //Check if there is already an identical item class stored
+        for (int i = 0; i < this.inventory.size(); i++ ) {
+
+            if(item.getType() == this.inventory.get(i).getType()) {
+                
+                //Effect swap
+                Item drop = this.inventory.get(i);
+                this.inventory.remove(i);
+
+                this.inventory.add(item);
+
+                return Optional.of(drop);
+
+            } 
+
+        }
+
+        //Otherwise, if there is room and no identical item class already stored:
+        this.inventory.add(item);
+        return Optional.empty();
+
+    }
+
+    public Optional<Item> removeItem() {
+
+        //Check if inventory is empty
+        if(this.inventory.size() == 0){
+            return Optional.empty();
+        }
+
+        //If non-empty, remove last item from inventory:
+        Item drop = this.inventory.getLast();
+        this.inventory.removeLast();
+        return Optional.of(drop);
+        
+    }
 
 }

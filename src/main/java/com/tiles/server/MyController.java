@@ -309,11 +309,11 @@ public class MyController {
         }
 
         //Check for moving into blocking terrain
-        if(this.world.isBlocking(proposedNewY,proposedNewX)) {
-            System.out.println("Movement blocked by terrain");
+        if(this.world.isBlocking(proposedNewY,proposedNewX).blocking() == true) {
+            System.out.println("Movement blocked by " + this.world.isBlocking(proposedNewY,proposedNewX).description());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-
+        
         //Not sure if this wrapping/clamping logic is needed, but left just in case - DS
         /* 
         // Wrap x coordinate

@@ -1,0 +1,4 @@
+a | axe | tool
+c | cyan potion | drink
+h | heart potion | drink
+k | key | artifact
