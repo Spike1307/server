@@ -36,6 +36,49 @@ var server_addr = window.location.origin;
 // Location of asset files.
 const asset_path = "/assets/64x64/";
 
+// API routing.
+const api_prefix = "/api";
+var sessionToken = null;
+
+function updateLoginStatus(message) {
+	const loginStatus = document.getElementById("loginStatus");
+	if (loginStatus) {
+		loginStatus.textContent = message;
+	}
+}
+
+function getApiUrl(path) {
+	return server_addr + api_prefix + path;
+}
+
+async function attemptLogin(username, password) {
+	try {
+		const response = await fetch(getApiUrl('/login'), {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json; charset=UTF-8'},
+			body: JSON.stringify({name: username, encpswrd: password})
+		});
+		if (!response.ok) {
+			if (response.status === 400) {
+				updateLoginStatus('Bad login request');
+			} else if (response.status === 401) {
+				updateLoginStatus('Invalid username or password');
+			} else {
+				updateLoginStatus('Login failed: ' + response.status);
+			}
+			return false;
+		}
+		const result = await response.json();
+		sessionToken = result.session;
+		updateLoginStatus('Logged in successfully');
+		return true;
+	} catch (error) {
+		console.error('Login error:', error);
+		updateLoginStatus('Login error');
+		return false;
+	}
+}
+
 // Map data.
 var map_width = 20;
 var map_height = 20;
@@ -228,15 +271,19 @@ function set_map_window(abs_top, abs_left, abs_bottom, abs_right, map_data) {
 }
 
 async function fetch_map(y, x) {
+	if (!sessionToken) {
+		updateLoginStatus('Login required for map data');
+		return null;
+	}
 	try {
-		const response = await fetch(server_addr + `/info?y=${y}&x=${x}`, {
+		const response = await fetch(getApiUrl(`/info?session=${encodeURIComponent(sessionToken)}&y=${y}&x=${x}`), {
 			method: 'GET',
-			headers: {'Content-type': 'application/json; charset=UTF-8'}
+			headers: {'Content-Type': 'application/json; charset=UTF-8'}
 		});
-		if (! response) {
+		if (!response) {
 			throw new Error(`HTTP error! info failed`);
 		}
-		if (! response.ok) {
+		if (!response.ok) {
 			throw new Error(`HTTP error! info not ok status: ${response.status}`);
 		}
 		const result = await response.json();
@@ -258,12 +305,16 @@ async function fetch_map_and_refresh() {
 }
 
 async function move_request(dy, dx) {
+	if (!sessionToken) {
+		updateLoginStatus('Login required to move');
+		return "blocked";
+	}
 	try {
-		const response = await fetch(server_addr + `/move?dy=${dy}&dx=${dx}`, {
+		const response = await fetch(getApiUrl(`/move?session=${encodeURIComponent(sessionToken)}&dy=${dy}&dx=${dx}`), {
 			method: 'GET',
-			headers: {'Content-type': 'text/plain; charset=UTF-8'}
+			headers: {'Content-Type': 'text/plain; charset=UTF-8'}
 		});
-		if (! response) {
+		if (!response) {
 			throw new Error(`HTTP error! move failed`);
 		}
 		if (response.status != 200) {
@@ -405,6 +456,10 @@ var gameArea = {
 		move_request(dy, dx);
 	},
 	handle_key: function (e) {
+		if (!sessionToken) {
+			updateLoginStatus('Login required to move');
+			return;
+		}
 		var key = this.get_key(e);
 		switch (key) {
 			case 65: // A
@@ -461,7 +516,11 @@ var gameArea = {
 	reset: function() {
 		server_addr = this.server.value || window.location.origin;
 		this.server.value = server_addr;
-		fetch_map_and_refresh();
+		if (sessionToken) {
+			fetch_map_and_refresh();
+		} else {
+			updateLoginStatus('Please login before starting');
+		}
 	},
 	start : function() {
 		this.canvas.width = default_width;
@@ -483,4 +542,15 @@ async function startGame() {
 	console.log('Player tiles loaded');
 	gameArea.start();
 	console.log('Game area started');
+	const loginBtn = document.getElementById('loginBtn');
+	if (loginBtn) {
+		loginBtn.addEventListener('click', async function () {
+			const username = document.getElementById('username')?.value || '';
+			const password = document.getElementById('password')?.value || '';
+			if (await attemptLogin(username, password)) {
+				fetch_map_and_refresh();
+			}
+		});
+	}
+	updateLoginStatus('Please log in to play.');
 }
