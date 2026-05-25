@@ -352,9 +352,6 @@ public class MyController {
             return new ResponseEntity<>(HttpStatus.OK);   
         }
 
-        //else make serverside changes
-        //world.useDoor(player.getY() + dy, player.getX() + dx);
-
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } 
 
