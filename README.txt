@@ -15,4 +15,3 @@ For detailed setup instructions, see SETUP.md
 DEPLOYMENT:
   1. Build: ./mvnw clean package -DskipTests
   2. Docker: docker build -t tileserver:latest . && docker run -p 8000:8000 tileserver:latest
-  3. Kubernetes: kubectl apply -f nginx-deployment.yaml && kubectl apply -f nginx-service.yaml
