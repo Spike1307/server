@@ -145,6 +145,14 @@ docker run -p 8000:8000 tileserver:latest
 
 Visit **http://localhost:8000/** → Game page loads ✅
 
+### Kubernetes
+```bash
+kubectl apply -f nginx-deployment.yaml
+kubectl apply -f nginx-service.yaml
+```
+
+Visit **http://<node-ip>:30080/** → Game page loads ✅
+
 ---
 
 ## What Collaborators Should Know

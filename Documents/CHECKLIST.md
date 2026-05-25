@@ -164,6 +164,7 @@ kill -9 <PID>
 ✅ src/main/java/ (Java source)
 ✅ pom.xml
 ✅ Dockerfile
+✅ *.yaml (Kubernetes manifests)
 ✅ README.txt, SETUP.md, buildcontainer.sh
 
 ❌ target/ (generated, add to .gitignore)
@@ -186,6 +187,18 @@ target/
 ```bash
 ./buildcontainer.sh
 # Opens container at http://localhost:8000
+```
+
+### Kubernetes
+```bash
+# Push to registry
+docker tag tileserver:latest yourusername/tileserver:latest
+docker push yourusername/tileserver:latest
+
+# Update nginx-deployment.yaml with your image
+# Then deploy:
+kubectl apply -f nginx-deployment.yaml
+kubectl apply -f nginx-service.yaml
 ```
 
 ---

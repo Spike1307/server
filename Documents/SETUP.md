@@ -7,6 +7,7 @@ This is a Spring Boot application that serves a game frontend (HTML/CSS/JS) alon
 - Java 21 (OpenJDK or similar)
 - Maven 3.8+
 - Docker (for containerization)
+- kubectl (for Kubernetes deployment)
 
 ---
 
@@ -81,6 +82,39 @@ Access: **http://localhost:8000/**
 
 ---
 
+## Kubernetes Deployment
+
+### 1. Push Image to Registry
+```bash
+# Tag and push to your registry (e.g., Docker Hub, ACR)
+docker tag tileserver:latest yourusername/tileserver:latest
+docker push yourusername/tileserver:latest
+```
+
+### 2. Update Image Reference in Manifests
+Edit `nginx-deployment.yaml`:
+```yaml
+containers:
+  - name: tileserver
+    image: yourusername/tileserver:latest  # Update this
+```
+
+### 3. Deploy to Kubernetes
+```bash
+kubectl apply -f nginx-deployment.yaml
+kubectl apply -f nginx-service.yaml
+```
+
+### 4. Verify Deployment
+```bash
+kubectl get pods
+kubectl get svc tileserver-service
+```
+
+Access via NodePort: **http://<node-ip>:30080/**
+
+---
+
 ## Troubleshooting
 
 ### Port Already in Use
@@ -110,6 +144,17 @@ If game shows black squares instead of textures:
 1. Add all PNG files to `src/main/resources/static/assets/64x64/`
 2. Rebuild the project
 3. Restart the application
+
+### Kubernetes Pod Won't Start
+Check logs:
+```bash
+kubectl logs <pod-name>
+```
+
+Common issues:
+- Image doesn't exist in registry
+- Port 8000 conflicts
+- Insufficient memory/CPU
 
 ---
 
@@ -152,6 +197,17 @@ The `@RestController` automatically serves:
    docker run -p 8000:8000 tileserver:latest
    ```
 
+4. **Deploy to Kubernetes**
+   ```bash
+   docker push yourusername/tileserver:latest
+   kubectl apply -f nginx-deployment.yaml
+   ```
 
+---
+
+## Support
+
+For issues with:
+- **Frontend**: Check browser console (`F12`), ensure assets exist
 - **Backend**: Check Java logs for stack traces
-- **Deployment**: Check Docker/container logs and container status
+- **Deployment**: Check pod logs with `kubectl logs`
