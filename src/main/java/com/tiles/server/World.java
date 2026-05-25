@@ -229,6 +229,33 @@ public class World {
 
     }
 
+    //This is just to have something working with use
+    //It may be better to have a generic is use method with an isUsable helper
+    //would need to modify map data to account -- like blocking
+    public boolean useDoor(int Y, int X){
+        String tile = this.MAP[Y][X];
+
+        if (!isDoor(Y, X)){
+            return false;
+        }
+
+        if (tile.contains("D")) {
+            this.MAP[Y][X] = tile.replace("D", "d");
+        }
+        if (tile.contains("d")) {
+            this.MAP[Y][X] = tile.replace("d", "D");
+        }
+
+        return true;
+
+    }
+
+    public boolean isDoor(int Y, int X) {
+        String tile = this.MAP[Y][X];
+
+        return tile.contains("D") || tile.contains("d");
+    }
+
     public Optional<Item> take(int Y, int X) {
 
         String tile = this.MAP[Y][X];
