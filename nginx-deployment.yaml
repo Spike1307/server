@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: tileserver
-          image: ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
+          image: tileserver:latest
           ports:
             - containerPort: 80
