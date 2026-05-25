@@ -319,6 +319,7 @@ public class MyController {
         player.setPos(proposedNewX, proposedNewY);
 
         world.eraseIcon(prevY, prevX, player.getIcon());
+        //world.drawIcon(playerY, playerX, player.getIcon());
         
         System.out.println("New player position: x=" + playerX + ", y=" + playerY);
         
@@ -328,4 +329,33 @@ public class MyController {
         return new ResponseEntity<>(response, HttpStatus.OK);
 
     }
+
+    @GetMapping("/use")
+    public ResponseEntity<String> handleUse(
+        @RequestParam String session, 
+        @RequestParam(defaultValue = "0") int dy,
+    	@RequestParam(defaultValue = "0") int dx) {
+    
+        // Validate session token
+        if (!sessions.isValid(session)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        int y = Math.abs(dy);
+        int x = Math.abs(dx);
+
+        PlayerData player = sessions.getPlayer(session);
+        
+        //if either is 1 or both 0
+        if ((y == 0 && x == 0) || (y == 1 && x == 0) || (y == 0 && x == 1)) {
+            world.useDoor(player.getY() + dy, player.getX() + dx);
+            return new ResponseEntity<>(HttpStatus.OK);   
+        }
+
+        //else make serverside changes
+        //world.useDoor(player.getY() + dy, player.getX() + dx);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    } 
+
 }
