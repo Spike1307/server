@@ -188,8 +188,7 @@ public class World {
     }
 
      public void eraseIcon(int Y, int X, int icon){
-        //replace instead of substring to not assume the player will alwas be the 
-        //final char
+        //replace instead of substring to not assume the player will always be the final char
         String tile = getTile(Y,X).replace(Integer.toString(icon), "");
         this.MAP[Y][X] = tile;
     }
