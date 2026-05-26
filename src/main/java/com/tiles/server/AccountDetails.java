@@ -12,19 +12,25 @@ import java.io.InputStreamReader;
 @Component
 public class AccountDetails {
     
-    private final HashMap<String, String> map = new HashMap<>(); //HashMap to store username and password pairs, where the key is the username and the value is the password
+    //HashMap to store username and password pairs, where the key is the username and the value is the password
+    private final HashMap<String, String> map = new HashMap<>(); 
 
     public AccountDetails() {
         try {
-            ClassPathResource resource = new ClassPathResource("AccountDetails.txt"); //loads the file from the classpath
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(resource.getInputStream()))) { //reads the file using BufferedReader
+            //loads the file from the classpath
+            ClassPathResource resource = new ClassPathResource("AccountDetails.txt"); 
+            //reads the file using BufferedReader
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(resource.getInputStream()))) { 
                 String line;
-                while ((line = br.readLine()) != null) {    //reads the file line by line until the end of the file is reached
+                //reads the file line by line until the end of the file is reached
+                while ((line = br.readLine()) != null) {    
                     System.out.println("Account details:");
                     System.out.println(line);
-                    String[] parts = line.split(":"); //splits the line into two parts using ":" as the delimiter, where parts[0] is the username and parts[1] is the password
+                    //splits the line into two parts using ":" as the delimiter, where parts[0] is the username and parts[1] is the password
+                    String[] parts = line.split(":"); 
                     if (parts.length == 2) {
-                        map.put(parts[0].trim(), parts[1].trim());  //splits the line into username and password and stores in map
+                        //splits the line into username and password and stores in map
+                        map.put(parts[0].trim(), parts[1].trim());  
                         System.out.println("Acc: " +parts[0]);
                         System.out.println("PW: " + parts[1]);
                     }
@@ -36,9 +42,8 @@ public class AccountDetails {
     }
     
     public HashMap<String, String> getMap() {
-        //harcoded credentials for testing because file read won't work
-        //this.map.put("john", "c9765b38a8ded4d7f4286cbab7c104e95208a911b189beaf3c88182376e6bf32");
-        return map; //returns the map containing username and password pairs
+        //returns the map containing username and password pairs
+        return map; 
     }
 
 }

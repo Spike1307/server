@@ -134,14 +134,6 @@ public class MyController {
             return new ResponseEntity<>(HttpStatus.OK);
         }
 
-        //If session key is currently in use and valid, remove it
-        // if (sessions.logOut(session) != null) {
-        //     //sessions.list();
-        //     System.out.println(name + " logged out");
-        //     world.eraseIcon(y, x, icon);
-        //     return new ResponseEntity<>(HttpStatus.OK);
-        // }
-
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
@@ -347,10 +339,11 @@ public class MyController {
         PlayerData player = sessions.getPlayer(session);
         
         //if either is 1 or both 0
-        if ((y == 0 && x == 0) || (y == 1 && x == 0) || (y == 0 && x == 1)) {
-            world.useDoor(player.getY() + dy, player.getX() + dx);
-            return new ResponseEntity<>(HttpStatus.OK);   
-        }
+        if (((y == 0 && x == 0) || (y == 1 && x == 0) || (y == 0 && x == 1)) 
+            && world.useDoor(player.getY() + dy, player.getX() + dx)){
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+        
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } 
