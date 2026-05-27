@@ -256,26 +256,15 @@ public class World {
         return tile.contains("D") || tile.contains("d");
     }
 
-    public Optional<Item> take(int Y, int X) {
-
+    public void take(int Y, int X, Item item) {
+        
         String tile = this.MAP[Y][X];
-
-        for (int i = 0; i < this.items.size(); i++) {
-            
-            if (tile.contains(this.items.get(i).getID())) {
-                
-                tile.replace(this.items.get(i).getID(), ""); //remove the item from the tile
-                return Optional.of(this.items.get(i));
-
-            }
-
-        }
-
-        return Optional.empty(); //no items found on tile
+        tile.replace(item.getID(), ""); //remove the item from the tile
+        this.MAP[Y][X] = tile; //update map with removed item
 
     }
 
-    public Optional<Item> canPlace(int Y, int X) {
+    public Optional<Item> containsItems(int Y, int X) {
 
         String tile = this.MAP[Y][X];
 
