@@ -392,6 +392,7 @@ public class MyController {
         Item droppedItem = storeResult.get();
         world.place(player.getY(),player.getX(), droppedItem); 
         System.out.println("Successfully stored: " + takenItem.getDesc() + ", dropped: " + droppedItem.getDesc());
+        
         return new ResponseEntity<>(HttpStatus.OK);
 
         //No need to check result of place here:
@@ -417,19 +418,22 @@ public class MyController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
-        Item droppedItem = player.removeItem();
+        Optional<Item> placeTest = world.canPlace(player.getY(),player.getX()); 
 
-        Optional<Item> placeResult = world.place(player.getY(),player.getX(), droppedItem); 
+        if (placeTest.isPresent()) {
 
-        if (!placeResult.isEmpty()) {
-
-            Item existingItem = placeResult.get();
+            //Some item is already there, can't place
+            Item existingItem = placeTest.get();
             System.out.println("Unable to place item at location Y: " + player.getY() + ", X: " + player.getX() + ", as another item: " + existingItem.getDesc() + " already exists at this location!");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         
         }
 
-        //Successfully placed item
+        //Can place item, free tile
+        Item droppedItem = player.removeItem(); //safe to call, inventory known to be non-empty
+        world.place(player.getY(),player.getX(),droppedItem); 
+        System.out.println("Successfully placed: " + droppedItem.getDesc());
+        
         return new ResponseEntity<>(HttpStatus.OK);
 
     }
