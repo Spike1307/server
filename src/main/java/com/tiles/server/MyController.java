@@ -10,6 +10,9 @@ import io.micrometer.common.util.StringUtils;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.http.ResponseEntity;
+
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 
 @RestController
@@ -363,6 +366,40 @@ public class MyController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
+        PlayerData player = sessions.getPlayer(session);
         
+        if (player.inventoryFull()) {
+            System.out.println("Unable to take item: " + player.getUsername() + " inventory is full!");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        Optional<Item> takeResult = world.take(player.getY(),player.getX());
+
+        if (takeResult.isEmpty()) {
+            System.out.println("No moveable item at current location Y: " + player.getY() + ", X: " + player.getX());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        Item takenItem = takeResult.get();
+
+        Optional<Item> storeResult = player.storeItem(takenItem);
+
+        if (storeResult.isEmpty()) {
+            System.out.println("Successfully stored: " + takenItem.getDesc());
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+
+        Item droppedItem = storeResult.get();
+        world.place(player.getY(),player.getX(), droppedItem); 
+        System.out.println("Successfully stored: " + takenItem.getDesc() + ", dropped: " + droppedItem.getDesc());
+        return new ResponseEntity<>(HttpStatus.OK);
+
+        //No need to check result of place here:
+        //Place only fails if there is already another item at that location. 
+        //We can be sure place will succeed, as there is only 1 item allowed per map tile.
+        //As we just removed whatever item was there originally, we know the tile will be empty before placement.
+        //So in this case, place is guaranteed to succeed. 
 
     }
+
+}

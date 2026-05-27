@@ -68,7 +68,7 @@ public class PlayerData {
         this.yPos = y;
     }
 
-    public boolean isInventoryFull() {
+    public boolean inventoryFull() {
 
         if(this.inventory.size()==maxItems) {
             return true;
