@@ -68,12 +68,17 @@ public class PlayerData {
         this.yPos = y;
     }
 
-    public Optional<Item> storeItem (Item item) {
+    public boolean isInventoryFull() {
 
-        //Check if there is room
         if(this.inventory.size()==maxItems) {
-            return Optional.of(item); //Return to sender
+            return true;
+        } else {
+            return false;
         }
+
+    }
+
+    public Optional<Item> storeItem (Item item) {
 
         //Check if there is already an identical item class stored
         for (int i = 0; i < this.inventory.size(); i++ ) {
