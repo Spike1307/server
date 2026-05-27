@@ -402,4 +402,19 @@ public class MyController {
 
     }
 
+    @GetMapping("/place")
+    public ResponseEntity<String> place(@RequestParam String session) {
+        
+        // Validate session token
+        if (!sessions.isValid(session)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        PlayerData player = sessions.getPlayer(session);
+        
+        if (player.inventoryEmpty()) {
+            System.out.println("Unable to place item: " + player.getUsername() + " inventory is empty!");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
 }
