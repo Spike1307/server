@@ -78,6 +78,16 @@ public class PlayerData {
 
     }
 
+    public boolean inventoryEmpty() {
+
+        if(this.inventory.size() == 0){
+            return true;
+        } else {
+            return false;
+        }
+        
+    }
+
     public Optional<Item> storeItem (Item item) {
 
         //Check if there is already an identical item class stored
@@ -103,17 +113,12 @@ public class PlayerData {
 
     }
 
-    public Optional<Item> removeItem() {
+    public Item removeItem() {
 
-        //Check if inventory is empty
-        if(this.inventory.size() == 0){
-            return Optional.empty();
-        }
-
-        //If non-empty, remove last item from inventory:
+        //Remove last item from inventory:
         Item drop = this.inventory.getLast();
         this.inventory.removeLast();
-        return Optional.of(drop);
+        return drop;
         
     }
 
