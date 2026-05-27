@@ -355,4 +355,14 @@ public class MyController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     } 
 
-}
+    @GetMapping("/take")
+    public ResponseEntity<String> take(@RequestParam String session) {
+        
+        // Validate session token
+        if (!sessions.isValid(session)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        
+
+    }
