@@ -372,15 +372,15 @@ public class MyController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
-        Optional<Item> takeResult = world.take(player.getY(),player.getX());
+        Optional<Item> tileItem = world.containsItems(player.getY(),player.getX());
 
-        if (takeResult.isEmpty()) {
+        if (tileItem.isEmpty()) {
             System.out.println("No moveable item at current location Y: " + player.getY() + ", X: " + player.getX());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
-        Item takenItem = takeResult.get();
-
+        Item takenItem = tileItem.get();
+        world.take(player.getY(),player.getX(), takenItem);
         Optional<Item> storeResult = player.storeItem(takenItem);
 
         if (storeResult.isEmpty()) {
@@ -394,8 +394,6 @@ public class MyController {
         
         return new ResponseEntity<>(HttpStatus.OK);
 
-        //No need to check result of place here:
-        //Place only fails if there is already another item at that location. 
         //We can be sure place will succeed, as there is only 1 item allowed per map tile.
         //As we just removed whatever item was there originally, we know the tile will be empty before placement.
         //So in this case, place is guaranteed to succeed. 
@@ -417,13 +415,13 @@ public class MyController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
-        Optional<Item> placeTest = world.canPlace(player.getY(),player.getX()); 
+        Optional<Item> tileItem = world.containsItems(player.getY(),player.getX()); 
 
-        if (placeTest.isPresent()) {
+        if (tileItem.isPresent()) {
 
             //Some item is already there, can't place
-            Item existingItem = placeTest.get();
-            System.out.println("Unable to place item at location Y: " + player.getY() + ", X: " + player.getX() + ", as another item: " + existingItem.getDesc() + " already exists at this location!");
+            System.out.println("Unable to place item at location Y: " + player.getY() + ", X: " + player.getX() 
+                + ", as another item: " + tileItem.get().getDesc() + " already exists at this location!");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         
         }
