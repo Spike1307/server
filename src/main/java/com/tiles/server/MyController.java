@@ -417,4 +417,21 @@ public class MyController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
+        Item droppedItem = player.removeItem();
+
+        Optional<Item> placeResult = world.place(player.getY(),player.getX(), droppedItem); 
+
+        if (!placeResult.isEmpty()) {
+
+            Item existingItem = placeResult.get();
+            System.out.println("Unable to place item at location Y: " + player.getY() + ", X: " + player.getX() + ", as another item: " + existingItem.getDesc() + " already exists at this location!");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        
+        }
+
+        //Successfully placed item
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
 }

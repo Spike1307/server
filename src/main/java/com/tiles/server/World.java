@@ -275,7 +275,7 @@ public class World {
 
     }
 
-    public Optional<Item> place(int Y, int X, Item item) {
+    public Optional<Item> canPlace(int Y, int X) {
 
         String tile = this.MAP[Y][X];
 
@@ -289,8 +289,16 @@ public class World {
             }
 
         }
+
+        //No items found
+        return Optional.empty();
+
+    }
+
+    public void place(int Y, int X, Item item) {
+
+        String tile = this.MAP[Y][X];
     
-        //If no item already exists at tile, then place item:
         //First check if there is player recorded at last character of tile string:
         String tileLastChar = tile.substring(tile.length()-1,tile.length()); //peration works with unit strings
         if (tileLastChar.matches("[0-9]")) { 
@@ -305,7 +313,6 @@ public class World {
         }
 
         this.MAP[Y][X] = tile; //update map with new item
-        return Optional.empty();
 
     }
 
