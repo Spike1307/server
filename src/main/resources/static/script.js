@@ -310,7 +310,9 @@ async function sha256(message) {
 
 async function fetch_login_session(name, password) {
 	try {
-		var encrypted = await sha256(name + ';' + password);
+		// The backend validates the submitted value directly against the digest
+		// stored in AccountDetails.txt. Do not re-hash the field here.
+		const encrypted = password;
 		const response = await fetch(server_addr +
 			`/login`, {
 			method: 'POST',
