@@ -38,8 +38,11 @@ var polling_counter = 0; // Current polling counter (counts up).
 var player_name = "";
 var session = "";
 
-// Server address.
-var server_addr = "http://localhost:8000";
+// Server address. Default to the current page origin so the frontend talks to
+// the same host/port that served the page and avoids cross-origin CORS issues.
+var server_addr = (typeof window !== 'undefined' && window.location && window.location.origin)
+	? window.location.origin
+	: "http://localhost";
 
 // Location of asset files.
 const asset_path = "assets/64x64/";
@@ -796,7 +799,10 @@ var gameArea = {
 	},
 	reset: function() {
 		this.canvas.focus();
-		server_addr = this.server.value;
+		if (!this.server.value || this.server.value === "http://localhost:8000") {
+			this.server.value = server_addr;
+		}
+		server_addr = this.server.value || window.location.origin;
 	},
 	start : function() {
 		this.canvas.width = default_width;
