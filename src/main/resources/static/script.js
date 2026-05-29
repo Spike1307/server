@@ -799,10 +799,13 @@ var gameArea = {
 	},
 	reset: function() {
 		this.canvas.focus();
-		if (!this.server.value || this.server.value === "http://localhost:8000") {
-			this.server.value = server_addr;
-		}
-		server_addr = this.server.value || window.location.origin;
+		// Always use the page origin for API calls. A manually typed old host/port
+		// (for example http://15.134.49.143:8000) causes cross-origin fetches
+		// and breaks the login flow in the deployed browser page.
+		server_addr = (typeof window !== 'undefined' && window.location && window.location.origin)
+			? window.location.origin
+			: "http://localhost";
+		this.server.value = server_addr;
 	},
 	start : function() {
 		this.canvas.width = default_width;
