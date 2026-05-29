@@ -41,8 +41,6 @@ RUN printf '%s\n' 'server {' \
 
 RUN rm -f /etc/nginx/sites-enabled/default && ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
-EXPOSE 8000
-
 EXPOSE 80
 
 CMD ["sh", "-c", "nginx && java -jar server.jar"]

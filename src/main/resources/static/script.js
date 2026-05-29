@@ -178,8 +178,13 @@ async function load_all_tiles() {
 }
 
 async function sha256(message) {
+	const subtle = globalThis.crypto?.subtle;
+	if (!subtle) {
+		throw new Error('Web Crypto API is unavailable in this browser/context.');
+	}
+
 	const encoded = new TextEncoder().encode(message);
-	const buffer = await crypto.subtle.digest('SHA-256', encoded);
+	const buffer = await subtle.digest('SHA-256', encoded);
 	const array = Array.from(new Uint8Array(buffer));
 	return array.map(b => b.toString(16).padStart(2, '0')).join('');
 }
