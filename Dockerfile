@@ -19,8 +19,8 @@ COPY --from=builder /server/target/server-0.0.1-SNAPSHOT.jar server.jar
 COPY --from=builder /server/src/main/resources/static /var/www/html
 
 RUN printf '%s\n' 'server {' \
-'    listen 80;' \
-'    server_name localhost;' \
+'    listen 80 default_server;' \
+'    server_name _;' \
 '    root /var/www/html;' \
 '    index index.html;' \
 '' \
