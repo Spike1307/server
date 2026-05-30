@@ -29,12 +29,12 @@ public class World {
     private String[][] MAP = new String[MAP_HEIGHT][MAP_WIDTH];
 
     // Record to store the terrain details (second + third columns from terrain text file)
-    public record tileInfo(String description, boolean blocking, boolean useable) {}
+    //public record tileInfo(String description, boolean blocking, boolean useable) {}
 
     // Record to store item details (second + third columns from items text file)
     //public record itemInfo(String description, String type) {}
 
-    private Map<String, tileInfo> terrains;
+    private Map<String, Terrain> terrains;
     private ArrayList<Item> items = new ArrayList<Item>();
     
     public World() {
@@ -103,12 +103,12 @@ public class World {
                 .filter(parts -> parts.length == 4) //Skip lines missing entries.
                 .collect(Collectors.toMap(
                         parts -> parts[0].substring(0,1), //single character key (as string)
-                        parts -> new tileInfo(
+                        parts -> new Terrain(
+                                parts[0].substring(0,1),
                                 parts[1], //Tile description
                                 parts[2].equalsIgnoreCase("blocking"), //true if "blocking", otherwise false
                                 parts[3].equalsIgnoreCase("useable") //true if "useable", otherwise false
                         )));
-        
 
         } catch (IOException e) {
 
@@ -118,7 +118,7 @@ public class World {
         
         System.out.println("Terrain key:");
         terrains.forEach((k, v) ->
-                    System.out.println(k + " | " + v.description + " | " + v.blocking + " | " + v.useable));
+            System.out.println(v.getKey() + " | " + v.getDesc() + " | " + v.isBlocking() + " | " + v.isUseable()));
 
     }
 
@@ -195,7 +195,7 @@ public class World {
         this.MAP[Y][X] = tile;
     }
 
-    public Map<String, tileInfo> getTerrains() {
+    public Map<String, Terrain> getTerrains() {
         return this.terrains;
     }
 
@@ -223,7 +223,7 @@ public class World {
 
     }
 
-    public tileInfo isBlocking(int Y, int X) {
+    public Terrain getTerrainOfPassagePriority(int Y, int X) {
 
         String tile = this.MAP[Y][X];
       

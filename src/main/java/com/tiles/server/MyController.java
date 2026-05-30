@@ -292,8 +292,10 @@ public class MyController {
         }
 
         //Check for moving into blocking terrain
-        if(this.world.isBlocking(proposedNewY,proposedNewX).blocking() == true) {
-            System.out.println("Movement blocked by " + this.world.isBlocking(proposedNewY,proposedNewX).description());
+        Terrain priorityTerrain = this.world.getTerrainOfPassagePriority(proposedNewY,proposedNewX);
+
+        if(priorityTerrain.isBlocking()) {
+            System.out.println("Movement blocked by " + priorityTerrain.getDesc());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         
