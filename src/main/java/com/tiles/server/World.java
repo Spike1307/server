@@ -29,7 +29,7 @@ public class World {
     private String[][] MAP = new String[MAP_HEIGHT][MAP_WIDTH];
 
     // Record to store the terrain details (second + third columns from terrain text file)
-    public record tileInfo(String description, boolean blocking) {}
+    public record tileInfo(String description, boolean blocking, boolean useable) {}
 
     // Record to store item details (second + third columns from items text file)
     //public record itemInfo(String description, String type) {}
@@ -100,12 +100,13 @@ public class World {
                 .map(String::trim)
                 .filter(line -> !line.isEmpty()) // skip empty lines
                 .map(line -> line.split("\\s*\\|\\s*"))  //split regex handles '|' delimeter with optional padding on either side.
-                .filter(parts -> parts.length == 3) //Skip lines missing entries.
+                .filter(parts -> parts.length == 4) //Skip lines missing entries.
                 .collect(Collectors.toMap(
                         parts -> parts[0].substring(0,1), //single character key (as string)
                         parts -> new tileInfo(
                                 parts[1], //Tile description
-                                parts[2].equalsIgnoreCase("blocking") //true if "blocking", otherwise false
+                                parts[2].equalsIgnoreCase("blocking"), //true if "blocking", otherwise false
+                                parts[3].equalsIgnoreCase("useable") //true if "useable", otherwise false
                         )));
         
 
@@ -117,7 +118,7 @@ public class World {
         
         System.out.println("Terrain key:");
         terrains.forEach((k, v) ->
-                    System.out.println(k + " | " + v.description + " | " + v.blocking));
+                    System.out.println(k + " | " + v.description + " | " + v.blocking + " | " + v.useable));
 
     }
 
