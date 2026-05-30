@@ -118,9 +118,10 @@ public class PlayerData {
         
     }
 
-    public boolean hasKey() {
+    public boolean hasItem(Item item) {
         
-        this.inventory.contains(inventory)
+        return this.inventory.contains(item);
+        
     }
 
 }

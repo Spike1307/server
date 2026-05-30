@@ -333,7 +333,7 @@ public class MyController {
     }
 
     @GetMapping("/use")
-    public ResponseEntity<String> handleUse(
+    public ResponseEntity<String> use(
         @RequestParam String session, 
         @RequestParam(defaultValue = "0") int dy,
     	@RequestParam(defaultValue = "0") int dx) {
@@ -347,15 +347,34 @@ public class MyController {
         int x = Math.abs(dx);
 
         PlayerData player = sessions.getPlayer(session);
-        
-        //if either is 1 or both 0
-        if ((y == 0 && x == 0) || (y == 1 && x == 0) || (y == 0 && x == 1)) {
-            world.useDoor(player.getY() + dy, player.getX() + dx);
-            return new ResponseEntity<>(HttpStatus.OK);   
+
+        //Check if use request has valid range
+        //if either is 1 or both 0 
+        if (((y == 0 && x == 0) || (y == 1 && x == 0) || (y == 0 && x == 1)) == false) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    } 
+        if(world.isDoor(player.getY() + dy, player.getX() + dx)) {
+
+            //Check if player has key
+            Item key = world.getItem("k").orElseThrow(); //Key should always exist, if not something bad has happened, throw exception
+            if(player.hasItem(key)){
+
+                world.useDoor(player.getY() + dy, player.getX() + dx);
+                System.out.println(player.getUsername() + " has used door.");
+                return new ResponseEntity<>(HttpStatus.OK);   
+            
+            } else {
+
+                System.out.println(player.getUsername() + " does not have key, cannot use door!");
+
+            }
+
+        }
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
+        
+    }
 
     @GetMapping("/take")
     public ResponseEntity<String> take(@RequestParam String session) {
