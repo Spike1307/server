@@ -35,6 +35,7 @@ public class World {
     //public record itemInfo(String description, String type) {}
 
     private Map<String, Terrain> terrains;
+    private ArrayList<Terrain> useableTerrains = new ArrayList<Terrain>();
     private ArrayList<Item> items = new ArrayList<Item>();
     
     public World() {
@@ -119,6 +120,15 @@ public class World {
         System.out.println("Terrain key:");
         terrains.forEach((k, v) ->
             System.out.println(v.getKey() + " | " + v.getDesc() + " | " + v.isBlocking() + " | " + v.isUseable()));
+
+        useableTerrains = terrains.values().stream()
+            .filter(terrain -> terrain.isUseable()==true) 
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        System.out.println("Useable terrains:");
+        for(Terrain terrain : this.useableTerrains) {
+            System.out.println(terrain.getDesc());
+        }
 
     }
 
@@ -269,6 +279,16 @@ public class World {
         return tile.contains("D") || tile.contains("d");
 
     }
+
+    /* 
+    public Optional<Terrain> isUsable(int Y, int X) {
+
+        String tile = this.MAP[Y][X];
+        return tile.contains("D") || tile.contains("d");
+
+
+    }
+    */
 
     public void take(int Y, int X, Item item) {
         
