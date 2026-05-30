@@ -143,8 +143,8 @@ public class World {
         }
         
         System.out.println("Items list:");
-        for(int i = 0; i < items.size(); i++) {
-            System.out.println(items.get(i).getID() + " | " + items.get(i).getDesc() + " | " + items.get(i).getType());
+        for(Item item : this.items) {
+            System.out.println(item.getID() + " | " + item.getDesc() + " | " + item.getType());
         }
 
     }
