@@ -280,15 +280,23 @@ public class World {
 
     }
 
-    /* 
-    public Optional<Terrain> isUsable(int Y, int X) {
+    public Optional<Terrain> containsUsable(int Y, int X) {
 
         String tile = this.MAP[Y][X];
-        return tile.contains("D") || tile.contains("d");
 
+        for (Terrain useableTerrain : this.useableTerrains) {
+        
+            if (tile.contains(useableTerrain.getKey())) {
+
+                return Optional.of(useableTerrain);
+
+            }
+
+        }
+
+        return Optional.empty();
 
     }
-    */
 
     public void take(int Y, int X, Item item) {
         
