@@ -80,11 +80,7 @@ public class PlayerData {
 
     public boolean inventoryEmpty() {
 
-        if(this.inventory.size() == 0){
-            return true;
-        } else {
-            return false;
-        }
+      return this.inventory.isEmpty();
         
     }
 
@@ -120,6 +116,11 @@ public class PlayerData {
         this.inventory.removeLast();
         return drop;
         
+    }
+
+    public boolean hasKey() {
+        
+        this.inventory.contains(inventory)
     }
 
 }

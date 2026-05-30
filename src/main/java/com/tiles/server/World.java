@@ -206,6 +206,22 @@ public class World {
         return MAP_HEIGHT;
     }
 
+    public Optional<Item> getItem(String ID) {
+        
+        for (Item item : this.items) {
+            
+            if (item.getID() == ID) {
+                
+                return Optional.of(item);
+
+            }
+
+        }
+
+        return Optional.empty();
+
+    }
+
     public tileInfo isBlocking(int Y, int X) {
 
         String tile = this.MAP[Y][X];
@@ -269,11 +285,11 @@ public class World {
         String tile = this.MAP[Y][X];
 
         //Check if an item already exists at this tile
-        for (int i = 0; i < this.items.size(); i++) {
+        for (Item item : this.items) {
             
-            if (tile.contains(this.items.get(i).getID())) {
+            if (tile.contains(item.getID())) {
                 
-                return Optional.of(this.items.get(i));
+                return Optional.of(item);
 
             }
 
