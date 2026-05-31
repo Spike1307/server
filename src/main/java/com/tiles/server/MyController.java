@@ -446,26 +446,29 @@ public class MyController {
         }
 
         Item takenItem = tileItem.get();
-        world.take(player.getY(),player.getX(), takenItem); //remove from map
         Optional<Item> swapResult = player.trySwap(takenItem);
 
         if (swapResult.isPresent()) {
 
+            world.take(player.getY(),player.getX(), takenItem); //remove from map
+
             Item droppedItem = swapResult.get();
             world.place(player.getY(),player.getX(), droppedItem); 
+
             System.out.println("Successfully stored: " + takenItem.getDesc() + ", dropped: " + droppedItem.getDesc());
             return new ResponseEntity<>(HttpStatus.OK);
             
         }
 
-        boolean addResult = player.tryAdd(takenItem);
-
-        if (addResult == false) {
+        if (player.inventoryFull()) {
 
             System.out.println("Unable to take item: " + player.getUsername() + " inventory is full!");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
         }
+
+        player.add(takenItem);
+        world.take(player.getY(),player.getX(), takenItem); //remove from map
 
         System.out.println("Successfully stored: " + takenItem.getDesc());
         return new ResponseEntity<>(HttpStatus.OK);

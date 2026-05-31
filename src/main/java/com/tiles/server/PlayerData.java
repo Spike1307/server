@@ -107,15 +107,10 @@ public class PlayerData {
 
     }
 
-    public boolean tryAdd(Item item) {
+    public void add(Item item) {
 
-        if (this.inventory.size() == maxItems) {
-            return false;
-        } else {
-            this.inventory.add(item);
-            return true;
-        }
-
+        this.inventory.add(item);
+         
     }
 
     public Item removeItem() {
