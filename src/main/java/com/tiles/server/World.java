@@ -221,7 +221,7 @@ public class World {
         
         for (Item item : this.items) {
             
-            if (item.getID() == ID) {
+            if (item.getID().equals(ID)) {
                 
                 return Optional.of(item);
 

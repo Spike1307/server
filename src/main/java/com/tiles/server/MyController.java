@@ -45,9 +45,12 @@ public class MyController {
 
     public MyController(AccountDetails accountDetails, World world) {
         
+        //Load external class dependencies
         this.accountDetails = accountDetails;
         this.world = world;
-        this.key = world.getItem("k").orElseThrow(); //Key should always exist, if not something bad has happened, throw exception
+
+        //Load reference objects
+        this.key = this.world.getItem("k").orElseThrow(); //Key should always exist, if not something bad has happened, throw exception
 
     }
 
