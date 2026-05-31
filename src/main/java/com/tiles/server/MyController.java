@@ -356,7 +356,10 @@ public class MyController {
         //Check if use request has valid range
         //if either is 1 or both 0 
         if (((y == 0 && x == 0) || (y == 1 && x == 0) || (y == 0 && x == 1)) == false) {
+
+            System.out.println("Use request is outside valid range!");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            
         }
 
         Optional<Terrain> useableTerrain = world.containsUsable(player.getY() + dy, player.getX() + dx);
