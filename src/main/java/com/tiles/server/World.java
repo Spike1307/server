@@ -323,8 +323,7 @@ public class World {
     public void take(int Y, int X, Item item) {
         
         String tile = this.MAP[Y][X];
-        tile.replace(item.getID(), ""); //remove the item from the tile
-        this.MAP[Y][X] = tile; //update map with removed item
+        this.MAP[Y][X] = tile.replace(item.getID(), ""); //update map with removed item
 
     }
 
