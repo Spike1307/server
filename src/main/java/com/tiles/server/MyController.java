@@ -431,10 +431,12 @@ public class MyController {
 
         PlayerData player = sessions.getPlayer(session);
         
+        /* 
         if (player.inventoryFull()) {
             System.out.println("Unable to take item: " + player.getUsername() + " inventory is full!");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+        */
 
         Optional<Item> tileItem = world.containsItems(player.getY(),player.getX());
 
@@ -444,23 +446,29 @@ public class MyController {
         }
 
         Item takenItem = tileItem.get();
-        world.take(player.getY(),player.getX(), takenItem);
-        Optional<Item> storeResult = player.storeItem(takenItem);
+        world.take(player.getY(),player.getX(), takenItem); //remove from map
+        Optional<Item> swapResult = player.trySwap(takenItem);
 
-        if (storeResult.isEmpty()) {
-            System.out.println("Successfully stored: " + takenItem.getDesc());
+        if (swapResult.isPresent()) {
+
+            Item droppedItem = swapResult.get();
+            world.place(player.getY(),player.getX(), droppedItem); 
+            System.out.println("Successfully stored: " + takenItem.getDesc() + ", dropped: " + droppedItem.getDesc());
             return new ResponseEntity<>(HttpStatus.OK);
+            
         }
 
-        Item droppedItem = storeResult.get();
-        world.place(player.getY(),player.getX(), droppedItem); 
-        System.out.println("Successfully stored: " + takenItem.getDesc() + ", dropped: " + droppedItem.getDesc());
-        
-        return new ResponseEntity<>(HttpStatus.OK);
+        boolean addResult = player.tryAdd(takenItem);
 
-        //We can be sure place will succeed, as there is only 1 item allowed per map tile.
-        //As we just removed whatever item was there originally, we know the tile will be empty before placement.
-        //So in this case, place is guaranteed to succeed. 
+        if (addResult == false) {
+
+            System.out.println("Unable to take item: " + player.getUsername() + " inventory is full!");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+        }
+
+        System.out.println("Successfully stored: " + takenItem.getDesc());
+        return new ResponseEntity<>(HttpStatus.OK);
 
     }
 
