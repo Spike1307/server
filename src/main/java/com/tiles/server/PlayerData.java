@@ -15,7 +15,7 @@ public class PlayerData {
     private Boolean spawned;
 
     private ArrayList<Item> inventory = new ArrayList<Item>();
-    private static final int maxItems = 3;
+    private static final int maxItems = 2;
 
     public PlayerData(String name) {
         this.username = name;
@@ -84,7 +84,7 @@ public class PlayerData {
         
     }
 
-    public Optional<Item> storeItem (Item item) {
+    public Optional<Item> trySwap (Item item) {
 
         //Check if there is already an identical item class stored
         for (int i = 0; i < this.inventory.size(); i++ ) {
@@ -102,10 +102,19 @@ public class PlayerData {
             } 
 
         }
-
-        //Otherwise, if there is room and no identical item class already stored:
-        this.inventory.add(item);
+        
         return Optional.empty();
+
+    }
+
+    public boolean tryAdd(Item item) {
+
+        if (this.inventory.size() == maxItems) {
+            return false;
+        } else {
+            this.inventory.add(item);
+            return true;
+        }
 
     }
 
