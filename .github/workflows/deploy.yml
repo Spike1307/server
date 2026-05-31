@@ -37,8 +37,43 @@ jobs:
         username: ec2-user
         key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         script: |
+          sudo docker network create monitoring || true
+
+          sudo tee /home/ec2-user/prometheus.yml > /dev/null <<'EOF'
+          global:
+            scrape_interval: 15s
+
+          scrape_configs:
+            - job_name: "tileserver"
+              metrics_path: /metrics
+              static_configs:
+                - targets: ["app:80"]
+          EOF
+
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
+
           sudo docker stop app || true
           sudo docker rm app || true
-          sudo docker run -d --name app -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
-          
+          sudo docker run -d \
+            --name app \
+            --network monitoring \
+            -p 80:80 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
+
+          sudo docker stop prometheus || true
+          sudo docker rm prometheus || true
+          sudo docker run -d \
+            --name prometheus \
+            --network monitoring \
+            -p 9090:9090 \
+            -v /home/ec2-user/prometheus.yml:/etc/prometheus/prometheus.yml \
+            prom/prometheus:latest
+
+          sudo docker stop grafana || true
+          sudo docker rm grafana || true
+          sudo docker run -d \
+            --name grafana \
+            --network monitoring \
+            -p 3000:3000 \
+            -e GF_SECURITY_ADMIN_PASSWORD=changeme \
+            grafana/grafana:latest
