@@ -41,10 +41,13 @@ public class MyController {
 
     private final World world;
 
+    private final Item key;
+
     public MyController(AccountDetails accountDetails, World world) {
         
         this.accountDetails = accountDetails;
         this.world = world;
+        this.key = world.getItem("k").orElseThrow(); //Key should always exist, if not something bad has happened, throw exception
 
     }
 
@@ -356,24 +359,58 @@ public class MyController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
-        if(world.isDoor(player.getY() + dy, player.getX() + dx)) {
+        Optional<Terrain> useableTerrain = world.containsUsable(player.getY() + dy, player.getX() + dx);
 
-            //Check if player has key
-            Item key = world.getItem("k").orElseThrow(); //Key should always exist, if not something bad has happened, throw exception
-            if(player.hasItem(key)){
+        if (useableTerrain.isEmpty()){
 
-                world.useDoor(player.getY() + dy, player.getX() + dx);
-                System.out.println(player.getUsername() + " has used door.");
-                return new ResponseEntity<>(HttpStatus.OK);   
+            System.out.println("No useable terrain at requested location y: " + (player.getY() + dy) + ", x: " + (player.getX() + dx));
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        
+        }
+
+        String useableTerrainKey = useableTerrain.get().getKey();
+
+        switch(useableTerrainKey) {
+
+            //Handle open door
+            case "d" -> {
+                
+                if (player.hasItem(key)) {
+
+                    world.lockDoor(player.getY() + dy, player.getX() + dx);
+                    System.out.println(player.getUsername() + " has locked door.");
+                    return new ResponseEntity<>(HttpStatus.OK);   
             
-            } else {
+                } else {
 
-                System.out.println(player.getUsername() + " does not have key, cannot use door!");
+                    System.out.println(player.getUsername() + " does not have key, cannot lock door!");
+
+                }
 
             }
 
+            //Handle closed door
+            case "D" -> {
+                
+                if (player.hasItem(key)) {
+
+                    world.unlockDoor(player.getY() + dy, player.getX() + dx);
+                    System.out.println(player.getUsername() + " has unlocked door.");
+                    return new ResponseEntity<>(HttpStatus.OK);   
+            
+                } else {
+
+                    System.out.println(player.getUsername() + " does not have key, cannot unlock door!");
+
+                }
+
+            }
+
+            default -> System.out.println("Unhandled interaction type!");
+        
         }
 
+        //For all unsuccessful interactions, return:
         return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
         
     }
