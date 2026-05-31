@@ -39,7 +39,7 @@ var player_name = "";
 var session = "";
 
 // Server address.
-var server_addr = "http://15.134.49.143:80";
+var server_addr = "http://15.134.49.143";
 
 // Location of asset files.
 const asset_path = "assets/64x64/";
