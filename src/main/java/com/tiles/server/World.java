@@ -259,6 +259,24 @@ public class World {
     //This is just to have something working with use
     //It may be better to have a generic is use method with an isUsable helper
     //would need to modify map data to account -- like blocking
+    
+    public void lockDoor(int Y, int X){
+
+        String tile = this.MAP[Y][X];
+        this.MAP[Y][X] = tile.replace("d", "D");
+    
+    }
+
+    public void unlockDoor(int Y, int X){
+
+        String tile = this.MAP[Y][X];
+        this.MAP[Y][X] = tile.replace("D", "d");
+    
+    }
+    
+
+    //Deprecated in favour of separate unlock/lock methods for granularity - D.S.
+    /* 
     public void useDoor(int Y, int X){
 
         String tile = this.MAP[Y][X];
@@ -272,13 +290,17 @@ public class World {
         }
 
     }
+    */
 
+    //Deprecated in favour of containsUsable - D.S.
+    /* 
     public boolean isDoor(int Y, int X) {
 
         String tile = this.MAP[Y][X];
         return tile.contains("D") || tile.contains("d");
 
     }
+    */
 
     public Optional<Terrain> containsUsable(int Y, int X) {
 
