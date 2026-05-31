@@ -89,7 +89,7 @@ public class PlayerData {
         //Check if there is already an identical item class stored
         for (int i = 0; i < this.inventory.size(); i++ ) {
 
-            if(item.getType() == this.inventory.get(i).getType()) {
+            if(item.getType().equals(this.inventory.get(i).getType())) {
                 
                 //Effect swap
                 Item drop = this.inventory.get(i);
