@@ -77,3 +77,10 @@ jobs:
             -p 3000:3000 \
             -e GF_SECURITY_ADMIN_PASSWORD=changeme \
             grafana/grafana:latest
+
+          sudo docker ps -a
+          sudo docker logs prometheus || true
+          sudo docker logs grafana || true
+          curl -I http://localhost:9090 || true
+          curl -I http://localhost:3000 || true
+          curl -I http://localhost/metrics || true
