@@ -175,9 +175,11 @@ public class MyController {
     		@RequestParam String session,
     		@RequestParam(defaultValue = "5") int y,
     		@RequestParam(defaultValue = "5") int x) {
-        
+        Histogram.Timer timer = GAME_LATENCY.labels("/info").startTimer();
+        try {
         // Validate session token
         if (!sessions.isValid(session)) {
+            GAME_REQUESTS.labels("/info", "401").inc();
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -209,6 +211,7 @@ public class MyController {
         
         //Return status 204 and exit early, if received coordinates do not match current player location stored on server
         if (x!=playerX||y!=playerY) {
+            GAME_REQUESTS.labels("/info", "204").inc();
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         
@@ -261,9 +264,13 @@ public class MyController {
         
         // Build response
         InfoResponse response = new InfoResponse(playerX, playerY, top, left, bottom, right, mapWindow);
-
+        GAME_REQUESTS.labels("/info", "200").inc();
         return new ResponseEntity<>(response, HttpStatus.OK);
         
+    
+    } finally {
+        timer.observeDuration();
+        }
     }
     
     @GetMapping("/move")
