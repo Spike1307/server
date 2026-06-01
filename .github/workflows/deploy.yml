@@ -1,0 +1,72 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    steps:
+    - name: Deploy to EC2 via SSH
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        script: |
+          sudo docker network create monitoring || true
+
+          sudo tee /home/ec2-user/prometheus.yml > /dev/null <<'EOF'
+          global:
+            scrape_interval: 15s
+
+          scrape_configs:
+            - job_name: "tileserver"
+              metrics_path: /metrics
+              static_configs:
+                - targets: ["app:80"]
+          EOF
+
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
+
+          sudo docker stop app || true
+          sudo docker rm app || true
+          sudo docker run -d --name app --network monitoring -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/tileserver:latest
+
+          sudo docker stop prometheus || true
+          sudo docker rm prometheus || true
+          sudo docker run -d --name prometheus --network monitoring -p 9090:9090 -v /home/ec2-user/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus:latest
+
+          sudo docker stop grafana || true
+          sudo docker rm grafana || true
+          sudo docker run -d --name grafana --network monitoring -p 3000:3000 -e GF_SECURITY_ADMIN_PASSWORD=changeme grafana/grafana:latest
+
+          sudo docker ps -a
+          sudo docker logs prometheus || true
+          sudo docker logs grafana || true
+          curl -I http://localhost:9090 || true
+          curl -I http://localhost:3000 || true
+          curl -I http://localhost/metrics || true

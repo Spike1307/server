@@ -43,11 +43,11 @@ public class PlayerData {
         this.spawned = true;
     }
 
-    public int getX() {
+    public synchronized int getX() {
         return this.xPos;
     }
     
-    public int getY() {
+    public synchronized int getY() {
         return this.yPos;
     }
 
@@ -63,7 +63,7 @@ public class PlayerData {
         return name.charAt(0) + asciiSum(name.substring(1));
     }
 
-    public void setPos(int x, int y) {
+    public synchronized void setPos(int x, int y) {
         this.xPos = x;
         this.yPos = y;
     }

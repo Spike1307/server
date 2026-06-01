@@ -9,6 +9,8 @@ public class LoginData {
 
     
     //Constructor
+    public LoginData(){} 
+
     public LoginData(String newName, String newEncpswrd) {
         this.name = newName;
         this.encpswrd = newEncpswrd;
@@ -21,7 +23,7 @@ public class LoginData {
     public void setEncpswrd(String encpswrd) { this.encpswrd = encpswrd; }
 
     private static final SecureRandom Token = new SecureRandom();
-    private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder();
+    private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder().withoutPadding();
     
     public String generateToken() {
         

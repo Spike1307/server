@@ -14,6 +14,10 @@ import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
+import io.prometheus.client.Counter;
+import io.prometheus.client.Histogram;
+import org.springframework.web.bind.annotation.*;
+
 @RestController
 @CrossOrigin(origins = "*")
 public class MyController {
@@ -42,6 +46,19 @@ public class MyController {
     private final World world;
 
     private final Item key;
+    private static final String ENDPOINT_MOVE = "/move";  //prometheus constants
+    
+    private static final Counter GAME_REQUESTS = Counter.build()
+            .name("game_requests_total")
+            .help("Total game requests")
+            .labelNames("endpoint")
+            .register();
+
+    private static final Histogram GAME_LATENCY = Histogram.build()
+            .name("game_request_duration_seconds")
+            .help("Game request latency in seconds")
+            .labelNames("endpoint")
+            .register();
 
     public MyController(AccountDetails accountDetails, World world) {
         
@@ -254,7 +271,8 @@ public class MyController {
     		@RequestParam String session,
     		@RequestParam(defaultValue = "0") int dy,
     		@RequestParam(defaultValue = "0") int dx) {
-        
+    Histogram.Timer timer = GAME_LATENCY.labels(ENDPOINT_MOVE).startTimer();
+    try {        
         // Validate session token
         if (!sessions.isValid(session)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -338,6 +356,10 @@ public class MyController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
 
+    } finally {
+        // Always fires — captures latency for every request regardless of outcome
+        timer.observeDuration();
+        }
     }
 
     @GetMapping("/use")
