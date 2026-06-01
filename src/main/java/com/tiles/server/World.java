@@ -174,38 +174,38 @@ public class World {
     }
     */
     
-    public String[][] getMap() {
+    public synchronized String[][] getMap() {
         return this.MAP;
     }
 
-    public String getTile(int Y, int X) {
+    public synchronized String getTile(int Y, int X) {
         return this.MAP[Y][X];
     }
 
-    public void drawIcon(int Y, int X, int icon){
+    public synchronized void drawIcon(int Y, int X, int icon){
         String tile = getTile(Y,X) + icon;
         this.MAP[Y][X] = tile;
     }
 
-     public void eraseIcon(int Y, int X, int icon){
+     public synchronized void eraseIcon(int Y, int X, int icon){
         //replace instead of substring to not assume the player will always be the final char
         String tile = getTile(Y,X).replace(Integer.toString(icon), "");
         this.MAP[Y][X] = tile;
     }
 
-    public Map<String, tileInfo> getTerrains() {
+    public synchronized Map<String, tileInfo> getTerrains() {
         return this.terrains;
     }
 
-    public int getWidth() {
+    public synchronized int getWidth() {
         return MAP_WIDTH;
     }
     
-    public int getHeight() {
+    public synchronized int getHeight() {
         return MAP_HEIGHT;
     }
 
-    public tileInfo isBlocking(int Y, int X) {
+    public synchronized tileInfo isBlocking(int Y, int X) {
 
         String tile = this.MAP[Y][X];
       
@@ -232,7 +232,7 @@ public class World {
     //It may be better to have a generic is use method with an isUsable helper
     //would need to modify map data to account -- like blocking
     //Or maybe an enum class and switch statements?
-    public boolean useDoor(int Y, int X){
+    public synchronized boolean useDoor(int Y, int X){
         String tile = this.MAP[Y][X];
 
         if (!isDoor(Y, X)){
@@ -250,7 +250,7 @@ public class World {
 
     }
 
-    public boolean isDoor(int Y, int X) {
+    public synchronized boolean isDoor(int Y, int X) {
         String tile = this.MAP[Y][X];
 
         return tile.contains("D") || tile.contains("d");
