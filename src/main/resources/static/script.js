@@ -177,7 +177,7 @@ async function load_all_tiles() {
 	}
 }
 
-async function sha256(message) {
+async function hashSha256(message) {
 	if (window.crypto && window.crypto.subtle) {
 		const encoded = new TextEncoder().encode(message);
 		const buffer = await crypto.subtle.digest('SHA-256', encoded);
@@ -194,7 +194,7 @@ async function sha256(message) {
 
 async function fetch_login_session(name, password) {
 	try {
-		var encrypted = await sha256(name + ';' + password);
+		var encrypted = await hashSha256(name + ';' + password);
 		const response = await fetch(server_addr +
 			`/login`, {
 			method: 'POST',
