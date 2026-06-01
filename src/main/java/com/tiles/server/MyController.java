@@ -5,10 +5,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import io.micrometer.common.util.StringUtils;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
+import java.util.Optional;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
@@ -43,6 +45,7 @@ public class MyController {
 
     private final World world;
 
+    private final Item key;
     private static final String ENDPOINT_MOVE = "/move";  //prometheus constants
     
     private static final Counter GAME_REQUESTS = Counter.build()
@@ -59,8 +62,12 @@ public class MyController {
 
     public MyController(AccountDetails accountDetails, World world) {
         
+        //Load external class dependencies
         this.accountDetails = accountDetails;
         this.world = world;
+
+        //Load reference objects
+        this.key = this.world.getItem("k").orElseThrow(); //Key should always exist, if not something bad has happened, throw exception
 
     }
 
@@ -309,8 +316,10 @@ public class MyController {
         }
 
         //Check for moving into blocking terrain
-        if(this.world.isBlocking(proposedNewY,proposedNewX).blocking() == true) {
-            System.out.println("Movement blocked by " + this.world.isBlocking(proposedNewY,proposedNewX).description());
+        Terrain priorityTerrain = this.world.getTerrainOfPassagePriority(proposedNewY,proposedNewX);
+
+        if(priorityTerrain.isBlocking()) {
+            System.out.println("Movement blocked by " + priorityTerrain.getDesc());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         
@@ -354,7 +363,7 @@ public class MyController {
     }
 
     @GetMapping("/use")
-    public ResponseEntity<String> handleUse(
+    public ResponseEntity<String> use(
         @RequestParam String session, 
         @RequestParam(defaultValue = "0") int dy,
     	@RequestParam(defaultValue = "0") int dx) {
@@ -368,14 +377,159 @@ public class MyController {
         int x = Math.abs(dx);
 
         PlayerData player = sessions.getPlayer(session);
-        
-        //if either is 1 or both 0
-        if ((y == 0 && x == 0) || (y == 1 && x == 0) || (y == 0 && x == 1)) {
-            world.useDoor(player.getY() + dy, player.getX() + dx);
-            return new ResponseEntity<>(HttpStatus.OK);   
+
+        //Check if use request has valid range
+        //if either is 1 or both 0 
+        if (((y == 0 && x == 0) || (y == 1 && x == 0) || (y == 0 && x == 1)) == false) {
+
+            System.out.println("Use request is outside valid range!");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            
         }
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    } 
+        Optional<Terrain> useableTerrain = world.containsUsable(player.getY() + dy, player.getX() + dx);
+
+        if (useableTerrain.isEmpty()){
+
+            System.out.println("No useable terrain at requested location y: " + (player.getY() + dy) + ", x: " + (player.getX() + dx));
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        
+        }
+
+        String useableTerrainKey = useableTerrain.get().getKey();
+
+        switch(useableTerrainKey) {
+
+            //Handle open door
+            case "d" -> {
+                
+                if (player.hasItem(key)) {
+
+                    world.lockDoor(player.getY() + dy, player.getX() + dx);
+                    System.out.println(player.getUsername() + " has locked door.");
+                    return new ResponseEntity<>(HttpStatus.OK);   
+            
+                } else {
+
+                    System.out.println(player.getUsername() + " does not have key, cannot lock door!");
+
+                }
+
+            }
+
+            //Handle closed door
+            case "D" -> {
+                
+                if (player.hasItem(key)) {
+
+                    world.unlockDoor(player.getY() + dy, player.getX() + dx);
+                    System.out.println(player.getUsername() + " has unlocked door.");
+                    return new ResponseEntity<>(HttpStatus.OK);   
+            
+                } else {
+
+                    System.out.println(player.getUsername() + " does not have key, cannot unlock door!");
+
+                }
+
+            }
+
+            default -> System.out.println("Unhandled interaction type!");
+        
+        }
+
+        //For all unsuccessful interactions, return:
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
+        
+    }
+
+    @GetMapping("/take")
+    public ResponseEntity<String> take(@RequestParam String session) {
+        
+        // Validate session token
+        if (!sessions.isValid(session)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        PlayerData player = sessions.getPlayer(session);
+        
+        /* 
+        if (player.inventoryFull()) {
+            System.out.println("Unable to take item: " + player.getUsername() + " inventory is full!");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        */
+
+        Optional<Item> tileItem = world.containsItems(player.getY(),player.getX());
+
+        if (tileItem.isEmpty()) {
+            System.out.println("No moveable item at current location Y: " + player.getY() + ", X: " + player.getX());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        Item takenItem = tileItem.get();
+        Optional<Item> swapResult = player.trySwap(takenItem);
+
+        if (swapResult.isPresent()) {
+
+            world.take(player.getY(),player.getX(), takenItem); //remove from map
+
+            Item droppedItem = swapResult.get();
+            world.place(player.getY(),player.getX(), droppedItem); 
+
+            System.out.println("Successfully stored: " + takenItem.getDesc() + ", dropped: " + droppedItem.getDesc());
+            return new ResponseEntity<>(HttpStatus.OK);
+            
+        }
+
+        if (player.inventoryFull()) {
+
+            System.out.println("Unable to take item: " + player.getUsername() + " inventory is full!");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+        }
+
+        player.add(takenItem);
+        world.take(player.getY(),player.getX(), takenItem); //remove from map
+
+        System.out.println("Successfully stored: " + takenItem.getDesc());
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
+    @GetMapping("/place")
+    public ResponseEntity<String> place(@RequestParam String session) {
+        
+        // Validate session token
+        if (!sessions.isValid(session)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        PlayerData player = sessions.getPlayer(session);
+        
+        if (player.inventoryEmpty()) {
+            System.out.println("Unable to place item: " + player.getUsername() + " inventory is empty!");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        Optional<Item> tileItem = world.containsItems(player.getY(),player.getX()); 
+
+        if (tileItem.isPresent()) {
+
+            //Some item is already there, can't place
+            System.out.println("Unable to place item at location Y: " + player.getY() + ", X: " + player.getX() 
+                + ", as another item: " + tileItem.get().getDesc() + " already exists at this location!");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        
+        }
+
+        //Can place item, free tile
+        Item droppedItem = player.removeItem(); //safe to call, inventory known to be non-empty
+        world.place(player.getY(),player.getX(),droppedItem); 
+        System.out.println("Successfully placed: " + droppedItem.getDesc());
+        
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
 
 }

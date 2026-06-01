@@ -15,7 +15,7 @@ public class PlayerData {
     private Boolean spawned;
 
     private ArrayList<Item> inventory = new ArrayList<Item>();
-    private static final int maxItems = 3;
+    private static final int maxItems = 2;
 
     public PlayerData(String name) {
         this.username = name;
@@ -68,17 +68,28 @@ public class PlayerData {
         this.yPos = y;
     }
 
-    public Optional<Item> storeItem (Item item) {
+    public boolean inventoryFull() {
 
-        //Check if there is room
         if(this.inventory.size()==maxItems) {
-            return Optional.of(item); //Return to sender
+            return true;
+        } else {
+            return false;
         }
+
+    }
+
+    public boolean inventoryEmpty() {
+
+      return this.inventory.isEmpty();
+        
+    }
+
+    public Optional<Item> trySwap (Item item) {
 
         //Check if there is already an identical item class stored
         for (int i = 0; i < this.inventory.size(); i++ ) {
 
-            if(item.getType() == this.inventory.get(i).getType()) {
+            if(item.getType().equals(this.inventory.get(i).getType())) {
                 
                 //Effect swap
                 Item drop = this.inventory.get(i);
@@ -91,24 +102,29 @@ public class PlayerData {
             } 
 
         }
-
-        //Otherwise, if there is room and no identical item class already stored:
-        this.inventory.add(item);
+        
         return Optional.empty();
 
     }
 
-    public Optional<Item> removeItem() {
+    public void add(Item item) {
 
-        //Check if inventory is empty
-        if(this.inventory.size() == 0){
-            return Optional.empty();
-        }
+        this.inventory.add(item);
+         
+    }
 
-        //If non-empty, remove last item from inventory:
+    public Item removeItem() {
+
+        //Remove last item from inventory:
         Item drop = this.inventory.getLast();
         this.inventory.removeLast();
-        return Optional.of(drop);
+        return drop;
+        
+    }
+
+    public boolean hasItem(Item item) {
+        
+        return this.inventory.contains(item);
         
     }
 
