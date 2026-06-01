@@ -178,10 +178,18 @@ async function load_all_tiles() {
 }
 
 async function sha256(message) {
-	const encoded = new TextEncoder().encode(message);
-	const buffer = await crypto.subtle.digest('SHA-256', encoded);
-	const array = Array.from(new Uint8Array(buffer));
-	return array.map(b => b.toString(16).padStart(2, '0')).join('');
+	if (window.crypto && window.crypto.subtle) {
+		const encoded = new TextEncoder().encode(message);
+		const buffer = await crypto.subtle.digest('SHA-256', encoded);
+		const array = Array.from(new Uint8Array(buffer));
+		return array.map(b => b.toString(16).padStart(2, '0')).join('');
+	}
+
+	if (window.sha256) {
+		return window.sha256(message);
+	}
+
+	throw new Error("SHA-256 is not available in this browser");
 }
 
 async function fetch_login_session(name, password) {
