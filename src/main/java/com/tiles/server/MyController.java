@@ -48,7 +48,7 @@ public class MyController {
     private static final Counter GAME_REQUESTS = Counter.build()
             .name("game_requests_total")
             .help("Total game requests")
-            .labelNames("endpoint")
+            .labelNames("endpoint", "status")
             .register();
 
     private static final Histogram GAME_LATENCY = Histogram.build()
@@ -268,6 +268,7 @@ public class MyController {
     try {        
         // Validate session token
         if (!sessions.isValid(session)) {
+            GAME_REQUESTS.labels("/move", "401").inc();
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -280,6 +281,7 @@ public class MyController {
 
         //Check for valid request
         if((Math.abs(dy)+Math.abs(dx)) > 1) {
+            GAME_REQUESTS.labels("/move", "204").inc();
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -344,7 +346,7 @@ public class MyController {
         
         // Build response
         MoveResponse response = new MoveResponse(playerX, playerY);
-
+        GAME_REQUESTS.labels("/move", "200").inc();
         return new ResponseEntity<>(response, HttpStatus.OK);
 
     } finally {
