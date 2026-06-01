@@ -108,16 +108,21 @@ public class MyController {
 
     @PostMapping("/login")
     public ResponseEntity<String> handleJsonRequest(@RequestBody LoginData loginData) { 
+        Histogram.Timer timer = GAME_LATENCY.labels("/login").startTimer();
+
+        try {
 
         //Check for bad request
         
         if (StringUtils.isBlank(loginData.getName())) {
             System.out.println("Bad username field - Bad Request");
+            GAME_REQUESTS.labels("/login", "400").inc();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         
         if  (StringUtils.isBlank(loginData.getEncpswrd())) {
             System.out.println("Bad password field - Bad Request");
+            GAME_REQUESTS.labels("/login", "400").inc();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         
@@ -136,14 +141,18 @@ public class MyController {
             // world.drawIcon(player.getY(), player.getX(), player.getIcon());
 
             //Return response with JSON formatted token
+            GAME_REQUESTS.labels("/login", "200").inc();
             return new ResponseEntity<>("{\"session\": " + "\"" + token + "\"}", HttpStatus.OK);
 
         } else {
             System.out.println("Invalid Credentials");
+            GAME_REQUESTS.labels("/login", "401").inc();
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         } 
 
-        
+        } finally {
+        timer.observeDuration(); //end of the timer
+        }
     }
 
     @GetMapping("/logout")
@@ -376,9 +385,11 @@ public class MyController {
         @RequestParam String session, 
         @RequestParam(defaultValue = "0") int dy,
     	@RequestParam(defaultValue = "0") int dx) {
-    
+        Histogram.Timer timer = GAME_LATENCY.labels("/use").startTimer();
+        try {
         // Validate session token
         if (!sessions.isValid(session)) {
+            GAME_REQUESTS.labels("/use", "401").inc();
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -392,6 +403,7 @@ public class MyController {
         if (((y == 0 && x == 0) || (y == 1 && x == 0) || (y == 0 && x == 1)) == false) {
 
             System.out.println("Use request is outside valid range!");
+            GAME_REQUESTS.labels("/use", "204").inc();
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             
         }
@@ -416,6 +428,7 @@ public class MyController {
 
                     world.lockDoor(player.getY() + dy, player.getX() + dx);
                     System.out.println(player.getUsername() + " has locked door.");
+                    GAME_REQUESTS.labels("/use", "200").inc();
                     return new ResponseEntity<>(HttpStatus.OK);   
             
                 } else {
@@ -433,6 +446,7 @@ public class MyController {
 
                     world.unlockDoor(player.getY() + dy, player.getX() + dx);
                     System.out.println(player.getUsername() + " has unlocked door.");
+                    GAME_REQUESTS.labels("/use", "200").inc();
                     return new ResponseEntity<>(HttpStatus.OK);   
             
                 } else {
@@ -448,15 +462,23 @@ public class MyController {
         }
 
         //For all unsuccessful interactions, return:
+        GAME_REQUESTS.labels("/use", "204").inc();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
+
+        } finally {
+        timer.observeDuration();
+        }
         
     }
 
     @GetMapping("/take")
     public ResponseEntity<String> take(@RequestParam String session) {
+    Histogram.Timer timer = GAME_LATENCY.labels("/take").startTimer();
+    try {
         
         // Validate session token
         if (!sessions.isValid(session)) {
+            GAME_REQUESTS.labels("/take", "401").inc();
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -473,6 +495,7 @@ public class MyController {
 
         if (tileItem.isEmpty()) {
             System.out.println("No moveable item at current location Y: " + player.getY() + ", X: " + player.getX());
+            GAME_REQUESTS.labels("/take", "204").inc();
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -487,6 +510,7 @@ public class MyController {
             world.place(player.getY(),player.getX(), droppedItem); 
 
             System.out.println("Successfully stored: " + takenItem.getDesc() + ", dropped: " + droppedItem.getDesc());
+            GAME_REQUESTS.labels("/take", "200").inc();
             return new ResponseEntity<>(HttpStatus.OK);
             
         }
@@ -494,6 +518,7 @@ public class MyController {
         if (player.inventoryFull()) {
 
             System.out.println("Unable to take item: " + player.getUsername() + " inventory is full!");
+            GAME_REQUESTS.labels("/take", "204").inc();
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
         }
@@ -502,15 +527,22 @@ public class MyController {
         world.take(player.getY(),player.getX(), takenItem); //remove from map
 
         System.out.println("Successfully stored: " + takenItem.getDesc());
+        GAME_REQUESTS.labels("/take", "200").inc();
         return new ResponseEntity<>(HttpStatus.OK);
+        } finally {
+        timer.observeDuration();
+        }
 
     }
 
     @GetMapping("/place")
     public ResponseEntity<String> place(@RequestParam String session) {
+        Histogram.Timer timer = GAME_LATENCY.labels("/place").startTimer();
+        try {
         
         // Validate session token
         if (!sessions.isValid(session)) {
+            GAME_REQUESTS.labels("/place", "401").inc();
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
@@ -518,6 +550,7 @@ public class MyController {
         
         if (player.inventoryEmpty()) {
             System.out.println("Unable to place item: " + player.getUsername() + " inventory is empty!");
+            GAME_REQUESTS.labels("/place", "204").inc();
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -528,6 +561,7 @@ public class MyController {
             //Some item is already there, can't place
             System.out.println("Unable to place item at location Y: " + player.getY() + ", X: " + player.getX() 
                 + ", as another item: " + tileItem.get().getDesc() + " already exists at this location!");
+            GAME_REQUESTS.labels("/place", "204").inc();
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         
         }
@@ -536,9 +570,12 @@ public class MyController {
         Item droppedItem = player.removeItem(); //safe to call, inventory known to be non-empty
         world.place(player.getY(),player.getX(),droppedItem); 
         System.out.println("Successfully placed: " + droppedItem.getDesc());
-        
+        GAME_REQUESTS.labels("/place", "200").inc();
         return new ResponseEntity<>(HttpStatus.OK);
 
+    
+    } finally {
+    timer.observeDuration();
     }
-
+    }
 }
