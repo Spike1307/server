@@ -325,6 +325,17 @@ public class MyController {
                 System.out.println("Right wrap");
         }
 
+        //Check for other player as blocking element:
+        Optional<Integer> tilePlayerIcon = this.world.checkIfPlayerOnTile(proposedNewY, proposedNewX);
+
+        if(tilePlayerIcon.isPresent()) { //Someone else is there
+            
+            String blockerUsername = this.sessions.getPlayerFromIcon(tilePlayerIcon.get()).orElseThrow();
+            System.out.println(player.getUsername() + " --> " + "Movement blocked by other player: " + blockerUsername);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        
+        }
+        
         //Check for moving into blocking terrain
         Terrain priorityTerrain = this.world.getTerrainOfPassagePriority(proposedNewY,proposedNewX);
 

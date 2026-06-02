@@ -232,6 +232,21 @@ public class World {
 
     }
 
+    public Optional<Integer> checkIfPlayerOnTile (int Y, int X) {
+        
+        String tile = this.MAP[Y][X];
+
+        for (int i = 0; i < 10; i++) {
+        
+            if (tile.contains(String.valueOf(i))) {
+                return Optional.of(i);
+            }
+        }
+        
+        return Optional.empty();
+
+    }
+    
     public Terrain getTerrainOfPassagePriority(int Y, int X) {
 
         String tile = this.MAP[Y][X];
