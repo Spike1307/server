@@ -1,6 +1,9 @@
 package com.tiles.server;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class Sessions {
     private HashMap<String, PlayerData> tokens;
@@ -19,6 +22,26 @@ public class Sessions {
 
     public void list() {
         System.out.println(tokens);
+    }
+
+    //For debug purposes - D.S
+    public Optional<String> getPlayerFromIcon (int lookupIcon) {
+
+        ArrayList<PlayerData> currentPlayers = new ArrayList<PlayerData>();
+
+        currentPlayers = tokens.values().stream()
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        for(PlayerData player : currentPlayers) {
+
+            if (player.getIcon() == lookupIcon) {
+                return Optional.of(player.getUsername());
+            }
+            
+        }
+
+        return Optional.empty();
+
     }
 
     //Required for tests - DS: overkill, deprecated in favour of isValid
