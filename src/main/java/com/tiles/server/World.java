@@ -29,12 +29,13 @@ public class World {
     private String[][] MAP = new String[MAP_HEIGHT][MAP_WIDTH];
 
     // Record to store the terrain details (second + third columns from terrain text file)
-    public record tileInfo(String description, boolean blocking) {}
+    //public record tileInfo(String description, boolean blocking, boolean useable) {}
 
     // Record to store item details (second + third columns from items text file)
     //public record itemInfo(String description, String type) {}
 
-    private Map<String, tileInfo> terrains;
+    private Map<String, Terrain> terrains;
+    private ArrayList<Terrain> useableTerrains = new ArrayList<Terrain>();
     private ArrayList<Item> items = new ArrayList<Item>();
     
     public World() {
@@ -100,14 +101,15 @@ public class World {
                 .map(String::trim)
                 .filter(line -> !line.isEmpty()) // skip empty lines
                 .map(line -> line.split("\\s*\\|\\s*"))  //split regex handles '|' delimeter with optional padding on either side.
-                .filter(parts -> parts.length == 3) //Skip lines missing entries.
+                .filter(parts -> parts.length == 4) //Skip lines missing entries.
                 .collect(Collectors.toMap(
                         parts -> parts[0].substring(0,1), //single character key (as string)
-                        parts -> new tileInfo(
+                        parts -> new Terrain(
+                                parts[0].substring(0,1),
                                 parts[1], //Tile description
-                                parts[2].equalsIgnoreCase("blocking") //true if "blocking", otherwise false
+                                parts[2].equalsIgnoreCase("blocking"), //true if "blocking", otherwise false
+                                parts[3].equalsIgnoreCase("useable") //true if "useable", otherwise false
                         )));
-        
 
         } catch (IOException e) {
 
@@ -117,7 +119,16 @@ public class World {
         
         System.out.println("Terrain key:");
         terrains.forEach((k, v) ->
-                    System.out.println(k + " | " + v.description + " | " + v.blocking));
+            System.out.println(v.getKey() + " | " + v.getDesc() + " | " + v.isBlocking() + " | " + v.isUseable()));
+
+        useableTerrains = terrains.values().stream()
+            .filter(terrain -> terrain.isUseable()==true) 
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        System.out.println("Useable terrains:");
+        for(Terrain terrain : this.useableTerrains) {
+            System.out.println(terrain.getDesc());
+        }
 
     }
 
@@ -142,8 +153,8 @@ public class World {
         }
         
         System.out.println("Items list:");
-        for(int i = 0; i < items.size(); i++) {
-            System.out.println(items.get(i).getID() + " | " + items.get(i).getDesc() + " | " + items.get(i).getType());
+        for(Item item : this.items) {
+            System.out.println(item.getID() + " | " + item.getDesc() + " | " + item.getType());
         }
 
     }
@@ -193,7 +204,7 @@ public class World {
         this.MAP[Y][X] = tile;
     }
 
-    public synchronized Map<String, tileInfo> getTerrains() {
+    public Map<String, Terrain> getTerrains() {
         return this.terrains;
     }
 
@@ -205,7 +216,23 @@ public class World {
         return MAP_HEIGHT;
     }
 
-    public synchronized tileInfo isBlocking(int Y, int X) {
+    public Optional<Item> getItem(String ID) {
+        
+        for (Item item : this.items) {
+            
+            if (item.getID().equals(ID)) {
+                
+                return Optional.of(item);
+
+            }
+
+        }
+
+        return Optional.empty();
+
+    }
+
+    public Terrain getTerrainOfPassagePriority(int Y, int X) {
 
         String tile = this.MAP[Y][X];
       
@@ -231,66 +258,98 @@ public class World {
     //This is just to have something working with use
     //It may be better to have a generic is use method with an isUsable helper
     //would need to modify map data to account -- like blocking
-    //Or maybe an enum class and switch statements?
-    public synchronized boolean useDoor(int Y, int X){
-        String tile = this.MAP[Y][X];
+    
+    public void lockDoor(int Y, int X){
 
-        if (!isDoor(Y, X)){
-            return false;
-        }
+        String tile = this.MAP[Y][X];
+        this.MAP[Y][X] = tile.replace("d", "D");
+    
+    }
+
+    public void unlockDoor(int Y, int X){
+
+        String tile = this.MAP[Y][X];
+        this.MAP[Y][X] = tile.replace("D", "d");
+    
+    }
+    
+
+    //Deprecated in favour of separate unlock/lock methods for granularity - D.S.
+    /* 
+    public void useDoor(int Y, int X){
+
+        String tile = this.MAP[Y][X];
 
         if (tile.contains("D")) {
             this.MAP[Y][X] = tile.replace("D", "d");
         }
+        
         if (tile.contains("d")) {
             this.MAP[Y][X] = tile.replace("d", "D");
         }
 
-        return true;
-
     }
+    */
 
-    public synchronized boolean isDoor(int Y, int X) {
+    //Deprecated in favour of containsUsable - D.S.
+    /* 
+    public boolean isDoor(int Y, int X) {
+
         String tile = this.MAP[Y][X];
-
         return tile.contains("D") || tile.contains("d");
-    }
 
-    public Optional<Item> take(int Y, int X) {
+    }
+    */
+
+    public Optional<Terrain> containsUsable(int Y, int X) {
 
         String tile = this.MAP[Y][X];
 
-        for (int i = 0; i < this.items.size(); i++) {
-            
-            if (tile.contains(this.items.get(i).getID())) {
-                
-                tile.replace(this.items.get(i).getID(), ""); //remove the item from the tile
-                return Optional.of(this.items.get(i));
+        for (Terrain useableTerrain : this.useableTerrains) {
+        
+            if (tile.contains(useableTerrain.getKey())) {
+
+                return Optional.of(useableTerrain);
 
             }
 
         }
 
-        return Optional.empty(); //no items found on tile
+        return Optional.empty();
 
     }
 
-    public Optional<Item> place(int Y, int X, Item item) {
+    public void take(int Y, int X, Item item) {
+        
+        String tile = this.MAP[Y][X];
+        this.MAP[Y][X] = tile.replace(item.getID(), ""); //update map with removed item
+
+    }
+
+    public Optional<Item> containsItems(int Y, int X) {
 
         String tile = this.MAP[Y][X];
 
         //Check if an item already exists at this tile
-        for (int i = 0; i < this.items.size(); i++) {
+        for (Item item : this.items) {
             
-            if (tile.contains(this.items.get(i).getID())) {
+            if (tile.contains(item.getID())) {
                 
-                return Optional.of(this.items.get(i));
+                return Optional.of(item);
 
             }
 
         }
+
+        //No items found
+        return Optional.empty();
+
+    }
+
+    public void place(int Y, int X, Item item) {
+
+        String tile = this.MAP[Y][X];
     
-        //If no item already exists at tile, then place item:
         //First check if there is player recorded at last character of tile string:
         String tileLastChar = tile.substring(tile.length()-1,tile.length()); //peration works with unit strings
         if (tileLastChar.matches("[0-9]")) { 
@@ -305,7 +364,6 @@ public class World {
         }
 
         this.MAP[Y][X] = tile; //update map with new item
-        return Optional.empty();
 
     }
 
