@@ -31,7 +31,7 @@ var posY = 5;
 const animation_time = 100; // 100 milliseconds = 10 frames per second.
 
 // Map polling time.
-const polling_time = 250; // Update map every 250 milliseconds (4fps).
+const polling_time = 1000; // Update map every 250 milliseconds (4fps).
 var polling_counter = 0; // Current polling counter (counts up).
 
 // User login status.
