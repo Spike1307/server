@@ -1,6 +1,6 @@
-Dashboard setup
+# Dashboard setup
 
-Grafana:
+### Grafana:
 
 1. Add prometheus as a data source. 
     http://prometheus:9090
@@ -35,9 +35,14 @@ Total successful logins:
 
 sum(game_requests_total{endpoint="/login", status="200"})
 
-Total bad credentials logins:
+total invalid credentials:
+
+sum(game_requests_total{endpoint="/login", status="401"})
+
+Total bad request logins:
 
 sum(game_requests_total{endpoint="/login", status="400"})
+
 
 ## Info
 
