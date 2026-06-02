@@ -168,14 +168,6 @@ public class MyController {
             return new ResponseEntity<>(HttpStatus.OK);
         }
 
-        //If session key is currently in use and valid, remove it
-        // if (sessions.logOut(session) != null) {
-        //     //sessions.list();
-        //     System.out.println(name + " logged out");
-        //     world.eraseIcon(y, x, icon);
-        //     return new ResponseEntity<>(HttpStatus.OK);
-        // }
-
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
