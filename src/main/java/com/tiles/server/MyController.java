@@ -161,6 +161,8 @@ public class MyController {
         if (sessions.isValid(session)){
             PlayerData player = sessions.getPlayer(session);
             
+            player.
+
             System.out.println(player.getUsername() + " logged out");
             world.eraseIcon(player.getY(), player.getX(), player.getIcon());
 

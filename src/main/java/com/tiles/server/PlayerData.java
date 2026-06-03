@@ -92,6 +92,16 @@ public class PlayerData {
         
     }
 
+    public boolean hasAnyItems() {
+
+        if(this.inventory.size()>0) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
     public Optional<Item> trySwap (Item item) {
 
         //Check if there is already an identical item class stored
