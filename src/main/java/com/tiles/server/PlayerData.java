@@ -80,6 +80,28 @@ public class PlayerData {
         
     }
 
+    public ArrayList<Item> getCurrentInventory() {
+
+        return this.inventory;
+
+    }
+
+    public void resetInventory() {
+        
+        this.inventory.clear();
+        
+    }
+
+    public boolean hasAnyItems() {
+
+        if(this.inventory.size()>0) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
     public Optional<Item> trySwap (Item item) {
 
         //Check if there is already an identical item class stored

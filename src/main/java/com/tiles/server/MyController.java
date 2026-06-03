@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import io.micrometer.common.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
 import org.springframework.web.bind.annotation.*;
+
+import com.tiles.server.ItemSpawnPoint;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -46,6 +49,7 @@ public class MyController {
     private final World world;
 
     private final Item key;
+
     private static final String ENDPOINT_MOVE = "/move";  //prometheus constants
     
     private static final Counter GAME_REQUESTS = Counter.build()
@@ -159,7 +163,25 @@ public class MyController {
     public ResponseEntity<String> handleLogOut(@RequestParam String session) {
 
         if (sessions.isValid(session)){
+
             PlayerData player = sessions.getPlayer(session);
+            
+            if(player.hasAnyItems()) {
+
+                ArrayList<Item> currentInventory = player.getCurrentInventory();
+
+                for(Item item : currentInventory) {
+
+                    ItemSpawnPoint freeSpawnPoint = world.getFreeSpawnPoint().orElseThrow(); //By definition will be free spawn point, if someone has taken something
+                    world.place(freeSpawnPoint.spawnY(), freeSpawnPoint.spawnX(), item);
+                    System.out.println(player.getUsername() + " --> " + "has returned: " + item.getDesc() + " on logout to Y: " + freeSpawnPoint.spawnY() + " X: " + freeSpawnPoint.spawnX());
+
+                }
+
+                player.resetInventory();
+                System.out.println(player.getUsername() + " --> " + "inventory reset!");
+
+            }
             
             System.out.println(player.getUsername() + " logged out");
             world.eraseIcon(player.getY(), player.getX(), player.getIcon());
