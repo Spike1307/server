@@ -363,6 +363,24 @@ public class World {
 
     }
 
+    public Optional<itemSpawnPoint> getFreeSpawnPoint() {
+
+        for (Item item : this.items) {
+            
+            if (this.containsItems(item.getSpawnY(), item.getSpawnX()).isEmpty()) {
+
+                itemSpawnPoint freeSpawnPoint = new itemSpawnPoint(item.getSpawnY(), item.getSpawnX());
+                return Optional.of(freeSpawnPoint);
+
+            }
+
+        }
+
+        //All occupied - should never happen in regular usage
+        return Optional.empty();
+
+    }
+
     public Optional<Item> containsItems(int Y, int X) {
 
         String tile = this.MAP[Y][X];

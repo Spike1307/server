@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import io.micrometer.common.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
@@ -159,10 +160,23 @@ public class MyController {
     public ResponseEntity<String> handleLogOut(@RequestParam String session) {
 
         if (sessions.isValid(session)){
+
             PlayerData player = sessions.getPlayer(session);
             
-            player.
+            if(player.hasAnyItems()) {
 
+                ArrayList<Item> currentInventory = player.getCurrentInventory();
+
+                for(Item item : currentInventory) {
+
+                    
+
+                }
+
+                player.resetInventory();
+
+            }
+            
             System.out.println(player.getUsername() + " logged out");
             world.eraseIcon(player.getY(), player.getX(), player.getIcon());
 
