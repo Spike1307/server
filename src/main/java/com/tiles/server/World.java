@@ -31,8 +31,7 @@ public class World {
     // Record to store the terrain details (second + third columns from terrain text file)
     //public record tileInfo(String description, boolean blocking, boolean useable) {}
 
-    // Record to store item details (second + third columns from items text file)
-    //public record itemInfo(String description, String type) {}
+    private record itemSpawnPoint(int spawnY, int spawnX) {}
 
     private Map<String, Terrain> terrains;
     private ArrayList<Terrain> useableTerrains = new ArrayList<Terrain>();
@@ -143,7 +142,7 @@ public class World {
                 .filter(line -> !line.isEmpty()) // skip empty lines
                 .map(line -> line.split("\\s*\\|\\s*"))  //split regex handles '|' delimeter with optional padding on either side.
                 .filter(parts -> parts.length == 3) //Skip lines missing entries.
-                .map(parts -> new Item(parts[0], parts[1], parts[2]))
+                .map(parts -> new Item(parts[0], parts[1], parts[2], this.getSpawn(parts[0]).orElseThrow().spawnY, this.getSpawn(parts[0]).orElseThrow().spawnX))
                 .collect(Collectors.toCollection(ArrayList::new));
 
         } catch (IOException e) {
@@ -154,7 +153,7 @@ public class World {
         
         System.out.println("Items list:");
         for(Item item : this.items) {
-            System.out.println(item.getID() + " | " + item.getDesc() + " | " + item.getType());
+            System.out.println(item.getID() + " | " + item.getDesc() + " | " + item.getType() + " | " + item.getSpawnY() + " | " + item.getSpawnX());
         }
 
     }
@@ -170,6 +169,29 @@ public class World {
         }
 
         return tilesList.toArray(new String[tilesList.size()]);
+
+    }
+
+    private Optional<itemSpawnPoint> getSpawn(String ID) {
+
+        for (int y = 0; y < MAP_HEIGHT; y++) {
+
+            for (int x = 0; x < MAP_WIDTH; x++) { 
+
+                 String tile = this.MAP[y][x];
+                 
+                 if(tile.contains(ID)) {
+
+                    itemSpawnPoint spawn = new itemSpawnPoint(y, x);
+                    return Optional.of(spawn);
+
+                 }
+                    
+            }
+
+        }
+
+        return Optional.empty();
 
     }
 
