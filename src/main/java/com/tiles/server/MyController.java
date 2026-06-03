@@ -19,6 +19,8 @@ import io.prometheus.client.Counter;
 import io.prometheus.client.Histogram;
 import org.springframework.web.bind.annotation.*;
 
+import com.tiles.server.ItemSpawnPoint;
+
 @RestController
 @CrossOrigin(origins = "*")
 public class MyController {
@@ -47,6 +49,7 @@ public class MyController {
     private final World world;
 
     private final Item key;
+
     private static final String ENDPOINT_MOVE = "/move";  //prometheus constants
     
     private static final Counter GAME_REQUESTS = Counter.build()
@@ -169,11 +172,14 @@ public class MyController {
 
                 for(Item item : currentInventory) {
 
-                    
+                    ItemSpawnPoint freeSpawnPoint = world.getFreeSpawnPoint().orElseThrow(); //By definition will be free spawn point, if someone has taken something
+                    world.place(freeSpawnPoint.spawnY(), freeSpawnPoint.spawnX(), item);
+                    System.out.println(player.getUsername() + " --> " + "has returned: " + item.getDesc() + " on logout to Y: " + freeSpawnPoint.spawnY() + " X: " + freeSpawnPoint.spawnX());
 
                 }
 
                 player.resetInventory();
+                System.out.println(player.getUsername() + " --> " + "inventory reset!");
 
             }
             

@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 
+import com.tiles.server.ItemSpawnPoint;
+
 @Component
 public class World {
 
@@ -31,7 +33,7 @@ public class World {
     // Record to store the terrain details (second + third columns from terrain text file)
     //public record tileInfo(String description, boolean blocking, boolean useable) {}
 
-    private record itemSpawnPoint(int spawnY, int spawnX) {}
+    //public record itemSpawnPoint(int spawnY, int spawnX) {}
 
     private Map<String, Terrain> terrains;
     private ArrayList<Terrain> useableTerrains = new ArrayList<Terrain>();
@@ -142,7 +144,7 @@ public class World {
                 .filter(line -> !line.isEmpty()) // skip empty lines
                 .map(line -> line.split("\\s*\\|\\s*"))  //split regex handles '|' delimeter with optional padding on either side.
                 .filter(parts -> parts.length == 3) //Skip lines missing entries.
-                .map(parts -> new Item(parts[0], parts[1], parts[2], this.getSpawn(parts[0]).orElseThrow().spawnY, this.getSpawn(parts[0]).orElseThrow().spawnX))
+                .map(parts -> new Item(parts[0], parts[1], parts[2], this.getSpawn(parts[0]).orElseThrow().spawnY(), this.getSpawn(parts[0]).orElseThrow().spawnX()))
                 .collect(Collectors.toCollection(ArrayList::new));
 
         } catch (IOException e) {
@@ -172,7 +174,7 @@ public class World {
 
     }
 
-    private Optional<itemSpawnPoint> getSpawn(String ID) {
+    private Optional<ItemSpawnPoint> getSpawn(String ID) {
 
         for (int y = 0; y < MAP_HEIGHT; y++) {
 
@@ -182,7 +184,7 @@ public class World {
                  
                  if(tile.contains(ID)) {
 
-                    itemSpawnPoint spawn = new itemSpawnPoint(y, x);
+                    ItemSpawnPoint spawn = new ItemSpawnPoint(y, x);
                     return Optional.of(spawn);
 
                  }
@@ -363,13 +365,13 @@ public class World {
 
     }
 
-    public Optional<itemSpawnPoint> getFreeSpawnPoint() {
+    public Optional<ItemSpawnPoint> getFreeSpawnPoint() {
 
         for (Item item : this.items) {
             
             if (this.containsItems(item.getSpawnY(), item.getSpawnX()).isEmpty()) {
 
-                itemSpawnPoint freeSpawnPoint = new itemSpawnPoint(item.getSpawnY(), item.getSpawnX());
+                ItemSpawnPoint freeSpawnPoint = new ItemSpawnPoint(item.getSpawnY(), item.getSpawnX());
                 return Optional.of(freeSpawnPoint);
 
             }
