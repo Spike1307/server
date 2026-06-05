@@ -374,6 +374,20 @@ class ServerApplicationTests {
 
 	@Test
 	@Order(9)
+	void moveRequestValidSession() throws Exception {
+		controller.getSessions().addSession(testToken, "test");
+
+		mockMvc.perform(get("/move")
+			.param("session", testToken)
+            .param("dx", "1")
+            .param("dy", "0"))
+        .andExpect(status().isOk());
+
+		controller.getSessions().logOut(testToken);		
+	}
+
+	@Test
+	@Order(9)
 	void badLogout() throws Exception {
 
 		mockMvc.perform(get("/logout" )
