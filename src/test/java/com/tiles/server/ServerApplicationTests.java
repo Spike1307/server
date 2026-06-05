@@ -387,7 +387,118 @@ class ServerApplicationTests {
 	}
 
 	@Test
-	@Order(9)
+	@Order(10)
+	void moveRequestLeft() throws Exception {
+		controller.getSessions().addSession(testToken, "test");
+
+		PlayerData player = controller.getSessions().getPlayer(testToken);
+
+		mockMvc.perform(get("/move")
+			.param("session", testToken)
+            .param("dx", "-1")
+            .param("dy", "0"))
+        .andExpect(status().isOk());
+
+		assertEquals(player.getX(), 4);
+		assertEquals(player.getY(), 5);
+
+		controller.getSessions().logOut(testToken);		
+	}
+
+	@Test
+	@Order(10)
+	void moveRequestRight() throws Exception {
+		controller.getSessions().addSession(testToken, "test");
+
+		PlayerData player = controller.getSessions().getPlayer(testToken);
+
+		mockMvc.perform(get("/move")
+			.param("session", testToken)
+            .param("dx", "1")
+            .param("dy", "0"))
+        .andExpect(status().isOk());
+
+		assertEquals(player.getX(), 6);
+		assertEquals(player.getY(), 5);
+
+		controller.getSessions().logOut(testToken);		
+	}
+
+	@Test
+	@Order(10)
+	void moveRequestUp() throws Exception {
+		controller.getSessions().addSession(testToken, "test");
+
+		PlayerData player = controller.getSessions().getPlayer(testToken);
+		//move player so that the wall isn't blocking
+		player.setPos(6, 5);
+
+		mockMvc.perform(get("/move")
+			.param("session", testToken)
+            .param("dx", "0")
+            .param("dy", "-1"))
+        .andExpect(status().isOk());
+
+		assertEquals(player.getX(), 6);
+		assertEquals(player.getY(), 4);
+
+		controller.getSessions().logOut(testToken);		
+	}
+
+	@Test
+	@Order(10)
+	void moveRequestDown() throws Exception {
+		controller.getSessions().addSession(testToken, "test");
+
+		PlayerData player = controller.getSessions().getPlayer(testToken);
+
+		mockMvc.perform(get("/move")
+			.param("session", testToken)
+            .param("dx", "0")
+            .param("dy", "1"))
+        .andExpect(status().isOk());
+
+		assertEquals(player.getX(), 5);
+		assertEquals(player.getY(), 6);
+
+		controller.getSessions().logOut(testToken);		
+	}
+
+	@Test
+	@Order(10)
+	void moveRequestBlocking() throws Exception {
+		controller.getSessions().addSession(testToken, "test");
+
+		mockMvc.perform(get("/move")
+			.param("session", testToken)
+            .param("dx", "0")
+            .param("dy", "-1"))
+        .andExpect(status().isNoContent());
+
+		controller.getSessions().logOut(testToken);		
+	}
+
+	@Test
+	@Order(10)
+	void moveRequestOutofMap() throws Exception {
+		controller.getSessions().addSession(testToken, "test");
+
+		PlayerData player = controller.getSessions().getPlayer(testToken);
+		player.setPos(5, 0);
+
+		mockMvc.perform(get("/move")
+			.param("session", testToken)
+            .param("dx", "0")
+            .param("dy", "-1"))
+        .andExpect(status().isNoContent());
+
+		controller.getSessions().logOut(testToken);		
+	}
+
+
+
+	@Test
+	@Order(11)
 	void badLogout() throws Exception {
 
 		mockMvc.perform(get("/logout" )
@@ -397,7 +508,7 @@ class ServerApplicationTests {
 	}
 
 	@Test
-	@Order(10)
+	@Order(12)
 	void goodLogout() throws Exception {
 
 		controller.getSessions().addSession(testToken, "test");
