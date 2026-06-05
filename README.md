@@ -43,3 +43,20 @@ Create security group for SSH traffic from 0.0.0.0/0
 | Prometheus | TCP | 9090 | Custom | 0.0.0.0/0 |
 | Grafana | TCP | 3000 | Custom | 0.0.0.0/0 |
 
+
+## Dashboard setup
+
+#### Prometheus
+
+Check it's running by visiting x.x.x.x:9090 (x.x.x.x is EC2 public IP address)
+
+check PromQL is working with ```sum(game_requests_total{endpoint="/info"})``` and move around in game.
+
+#### Grafana
+
+head to x.x.x.x:3000 (x.x.x.x is EC2 public IP address)
+
+Add a new data source and use http://prometheus:9090
+
+Add a new dashboard and import Documents/dashboard-1780455946532.json that's in the documents folder in this repo.
+
