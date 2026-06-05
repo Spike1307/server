@@ -99,16 +99,6 @@ public class MyController {
     public Boolean sessionValid(String token) {
         return this.sessions.isValid(token);
     }
-    
-    @PostMapping("/test")
-    public ResponseEntity<RequestData> handleJsonRequest(@RequestBody RequestData requestData) {
-        System.out.println("Received name: " + requestData.getName());
-        System.out.println("Received gold: " + requestData.getGold());
-        System.out.println("Received silver: " + requestData.getSilver());
-        System.out.println("Received bronze: " + requestData.getBronze());
-        return new ResponseEntity<>(requestData, HttpStatus.OK);
-    }
-
 
     @PostMapping("/login")
     public ResponseEntity<String> handleJsonRequest(@RequestBody LoginData loginData) { 

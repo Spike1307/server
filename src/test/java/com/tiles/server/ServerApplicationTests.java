@@ -495,7 +495,68 @@ class ServerApplicationTests {
 		controller.getSessions().logOut(testToken);		
 	}
 
+	@Test
+	@Order(11)
+	void useRequestWithoutValidSession() throws Exception {
 
+		mockMvc.perform(get("/use")
+			.param("session", "badtoken")
+            .param("dx", "1")
+            .param("dy", "0"))
+        .andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	@Order(11)
+	void useRequestWithNoKey() throws Exception {
+
+		controller.getSessions().addSession(testToken, "test");
+		PlayerData player = controller.getSessions().getPlayer(testToken);
+		player.setPos(3, 5);
+
+		mockMvc.perform(get("/use")
+			.param("session", testToken)
+            .param("dx", "0")
+            .param("dy", "-1"))
+        .andExpect(status().isNoContent());
+
+		controller.getSessions().logOut(testToken);	
+	}
+
+	// @Test
+	// @Order(11)
+	// void useRequestWithKey() throws Exception {
+
+	// 	controller.getSessions().addSession(testToken, "test");
+	// 	PlayerData player = controller.getSessions().getPlayer(testToken);
+	// 	player.setPos(3, 5);
+	// 	player.add(new Item("k", "key", "artifact", 5, 5));
+
+	// 	mockMvc.perform(get("/use")
+	// 		.param("session", testToken)
+    //         .param("dx", "0")
+    //         .param("dy", "-1"))
+    //     .andExpect(status().isOk());
+
+	// 	controller.getSessions().logOut(testToken);	
+	// }
+
+	@Test
+	@Order(11)
+	void useRequestInvalidLocation() throws Exception {
+
+		controller.getSessions().addSession(testToken, "test");
+		PlayerData player = controller.getSessions().getPlayer(testToken);
+		player.setPos(5, 5);
+
+		mockMvc.perform(get("/use")
+			.param("session", testToken)
+            .param("dx", "0")
+            .param("dy", "-1"))
+        .andExpect(status().isNoContent());
+
+		controller.getSessions().logOut(testToken);	
+	}
 
 	@Test
 	@Order(11)
